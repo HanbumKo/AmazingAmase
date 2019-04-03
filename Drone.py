@@ -1,6 +1,6 @@
 
 
-class drone():
+class Drone():
     def __init__(self):
         self.ID = -1
         self.u = -1
@@ -325,6 +325,9 @@ class drone():
         return self.u
 
     def setV(self):
+        return self.v
+
+    def setW(self):
         return self.v
 
     def setUdot(self):
