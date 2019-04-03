@@ -1,4 +1,4 @@
-This repository for reimplementation of AMASE-firehack challenge 2019.
+A repository for reimplementation of AMASE-firehack challenge 2019.
 
 The description of the AMASE is following <https://github.com/afrl-rq/OpenAMASE>
 
