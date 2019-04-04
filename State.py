@@ -46,7 +46,7 @@ class State():
         self.uavList = {} # Dictionary
         self.numOfDrone = 0
 
-    def addNewUAV_State(self, AirVehicleState):
+    def updateUAV(self, AirVehicleState):
         ID = AirVehicleState.get_ID()
         droneObject = {}
         if ID not in self.uavList:
@@ -82,23 +82,87 @@ class State():
         droneObject.setVerticalSpeed(AirVehicleState.get_VerticalSpeed())
         droneObject.setW(AirVehicleState.get_w())
         droneObject.setWdot(AirVehicleState.get_wdot())
+        droneObject.setLatitude(AirVehicleState.get_Location().get_Latitude())
+        droneObject.setLongitude(AirVehicleState.get_Location().get_Longitude())
+        droneObject.setAltitude(AirVehicleState.get_Location().get_Altitude())
+        droneObject.setAltitudeType(AirVehicleState.get_Location().get_AltitudeType())
 
-    def addNewUAV_Configuration(self, lmcpObject):
+        # Gimbal state
+        droneObject.setGimbalPayloadID(AirVehicleState.get_PayloadStateList()[0].get_PayloadID())
+        droneObject.setGimbalPointingMode(AirVehicleState.get_PayloadStateList()[0].get_PointingMode())
+        droneObject.setGimbalAzimuth(AirVehicleState.get_PayloadStateList()[0].get_Azimuth())
+        droneObject.setGimbalElevation(AirVehicleState.get_PayloadStateList()[0].get_Elevation())
+        droneObject.setGimbalRotation(AirVehicleState.get_PayloadStateList()[0].get_Rotation())
+
+        # Camera state
+        droneObject.setCameraPayloadID(AirVehicleState.get_PayloadStateList()[1].get_PayloadID())
+        droneObject.setCameraPointingMode(AirVehicleState.get_PayloadStateList()[1].get_PointingMode())
+        droneObject.setCameraAzimuth(AirVehicleState.get_PayloadStateList()[1].get_Azimuth())
+        droneObject.setCameraElevation(AirVehicleState.get_PayloadStateList()[1].get_Elevation())
+        droneObject.setCameraRotation(AirVehicleState.get_PayloadStateList()[1].get_Rotation())
+        droneObject.setCameraHorizontalFieldOfView(AirVehicleState.get_PayloadStateList()[1].get_HorizontalFieldOfView())
+        droneObject.setCameraVerticalFieldOfView(AirVehicleState.get_PayloadStateList()[1].get_VerticalFieldOfView())
+        droneObject.setCameraCenterpoint(AirVehicleState.get_PayloadStateList()[1].get_Centerpoint())
+
+        # Hazard sensor state
+        droneObject.setCameraPayloadID(AirVehicleState.get_PayloadStateList()[2].get_PayloadID())
+        droneObject.setCameraPointingMode(AirVehicleState.get_PayloadStateList()[2].get_PointingMode())
+        droneObject.setCameraAzimuth(AirVehicleState.get_PayloadStateList()[2].get_Azimuth())
+        droneObject.setCameraElevation(AirVehicleState.get_PayloadStateList()[2].get_Elevation())
+        droneObject.setCameraRotation(AirVehicleState.get_PayloadStateList()[2].get_Rotation())
+        droneObject.setCameraHorizontalFieldOfView(AirVehicleState.get_PayloadStateList()[2].get_HorizontalFieldOfView())
+        droneObject.setCameraVerticalFieldOfView(AirVehicleState.get_PayloadStateList()[2].get_VerticalFieldOfView())
+        droneObject.setCameraCenterpoint(AirVehicleState.get_PayloadStateList()[2].get_Centerpoint())
+
+
+    def addNewUAV(self, AirVehicleConfiguration):
         newDrone = Drone.Drone()
-        newDrone.setID(lmcpObject.get_ID())
-        newDrone.setMaximumSpeed(lmcpObject.get_MaximumSpeed())
-        newDrone.setLabel(lmcpObject.get_Label())
-        newDrone.setMaxAltitudeType(lmcpObject.get_MaxAltitudeType())
-        newDrone.setMaximumAltitude(lmcpObject.get_MaximumAltitude())
-        newDrone.setMinAltitudeType(lmcpObject.get_MinAltitudeType())
-        newDrone.setMinimumAltitude(lmcpObject.get_MinimumAltitude())
-        newDrone.setMinimumSpeed(lmcpObject.get_MinimumSpeed())
-        newDrone.setNominalAltitude(lmcpObject.get_NominalAltitude())
-        newDrone.setNominalAltitudeType(lmcpObject.get_NominalAltitudeType())
+        newDrone.setID(AirVehicleConfiguration.get_ID())
+        newDrone.setMaximumSpeed(AirVehicleConfiguration.get_MaximumSpeed())
+        newDrone.setLabel(AirVehicleConfiguration.get_Label())
+        newDrone.setMaxAltitudeType(AirVehicleConfiguration.get_MaxAltitudeType())
+        newDrone.setMaximumAltitude(AirVehicleConfiguration.get_MaximumAltitude())
+        newDrone.setMinAltitudeType(AirVehicleConfiguration.get_MinAltitudeType())
+        newDrone.setMinimumAltitude(AirVehicleConfiguration.get_MinimumAltitude())
+        newDrone.setMinimumSpeed(AirVehicleConfiguration.get_MinimumSpeed())
+        newDrone.setNominalAltitude(AirVehicleConfiguration.get_NominalAltitude())
+        newDrone.setNominalAltitudeType(AirVehicleConfiguration.get_NominalAltitudeType())
+        newDrone.setNominalSpeed(AirVehicleConfiguration.get_NominalSpeed())
+
+        # Gimbal Configuration
+        newDrone.setGimbalPayloadID(AirVehicleConfiguration.get_PayloadConfigurationList()[0].get_PayloadID())
+        newDrone.setGimbalMinAzimuth(AirVehicleConfiguration.get_PayloadConfigurationList()[0].get_MinAzimuth())
+        newDrone.setGimbalMaxAzimuth(AirVehicleConfiguration.get_PayloadConfigurationList()[0].get_MaxAzimuth())
+        newDrone.setGimbalIsAzimuthClamped(AirVehicleConfiguration.get_PayloadConfigurationList()[0].get_IsAzimuthClamped())
+        newDrone.setGimbalMinElevation(AirVehicleConfiguration.get_PayloadConfigurationList()[0].get_MinElevation())
+        newDrone.setGimbalMaxElevation(AirVehicleConfiguration.get_PayloadConfigurationList()[0].get_MaxElevation())
+        newDrone.setGimbalIsElevationClamped(AirVehicleConfiguration.get_PayloadConfigurationList()[0].get_IsElevationClamped())
+        newDrone.setGimbalMinRotation(AirVehicleConfiguration.get_PayloadConfigurationList()[0].get_MinRotation())
+        newDrone.setGimbalMaxRotation(AirVehicleConfiguration.get_PayloadConfigurationList()[0].get_MaxRotation())
+        newDrone.setGimbalIsRotationClamped(AirVehicleConfiguration.get_PayloadConfigurationList()[0].get_IsRotationClamped())
+        newDrone.setGimbalMaxAzimuthSlewRate(AirVehicleConfiguration.get_PayloadConfigurationList()[0].get_MaxAzimuthSlewRate())
+        newDrone.setGimbalMaxElevationSlewRate(AirVehicleConfiguration.get_PayloadConfigurationList()[0].get_MaxElevationSlewRate())
+        newDrone.setGimbalMaxRotationRate(AirVehicleConfiguration.get_PayloadConfigurationList()[0].get_MaxRotationRate())
+
+        # Camera Configuration
+        newDrone.setCameraPayloadID(AirVehicleConfiguration.get_PayloadConfigurationList()[1].get_PayloadID())
+        newDrone.setCameraSupportedWavelengthBand(AirVehicleConfiguration.get_PayloadConfigurationList()[1].get_SupportedWavelengthBand())
+        newDrone.setCameraFieldOfViewMode(AirVehicleConfiguration.get_PayloadConfigurationList()[1].get_FieldOfViewMode())
+        newDrone.setCameraMinHorizontalFieldOfView(AirVehicleConfiguration.get_PayloadConfigurationList()[1].get_MinHorizontalFieldOfView())
+        newDrone.setCameraMaxHorizontalFieldOfView(AirVehicleConfiguration.get_PayloadConfigurationList()[1].get_MaxHorizontalFieldOfView())
+        newDrone.setCameraVideoStreamHorizontalResolution(AirVehicleConfiguration.get_PayloadConfigurationList()[1].get_VideoStreamHorizontalResolution())
+        newDrone.setCameraVideoStreamVerticalResolution(AirVehicleConfiguration.get_PayloadConfigurationList()[1].get_VideoStreamVerticalResolution())
+
+        # Hazard sensor Configuration
+        newDrone.setHazardPayloadID(AirVehicleConfiguration.get_PayloadConfigurationList()[2].get_PayloadID())
+        newDrone.setHazardMaxRange(AirVehicleConfiguration.get_PayloadConfigurationList()[2].get_MaxRange())
+        newDrone.setHazardHorizontalFOV(AirVehicleConfiguration.get_PayloadConfigurationList()[2].get_HorizontalFOV())
+        newDrone.setHazardVerticalFOV(AirVehicleConfiguration.get_PayloadConfigurationList()[2].get_VerticalFOV())
 
         self.numOfDrone = self.numOfDrone + 1
-        self.uavList[lmcpObject.get_ID()] = newDrone
-        print("UAV ", lmcpObject.get_ID(), " is added to uavList")
+        self.uavList[AirVehicleConfiguration.get_ID()] = newDrone
+        print("UAV ", AirVehicleConfiguration.get_ID(), " is added to uavList")
+
 
 
 

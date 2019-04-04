@@ -276,3 +276,7 @@ venv/lib/python3.6/site-packages/pip-9.0.1-py3.6.egg/pip/wheel.py
 venv/lib/python3.6/site-packages/setuptools-28.8.0-py3.6.egg
 venv/lib/python3.6/site-packages/setuptools.pth
 venv/pyvenv.cfg
+*.pyc
+*.pyc
+__pycache__/Drone.cpython-36.pyc
+__pycache__/State.cpython-36.pyc

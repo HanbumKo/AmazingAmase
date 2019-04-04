@@ -36,6 +36,7 @@ from afrl.cmasi.EntityConfiguration import EntityConfiguration
 
 import Drone
 import State
+import KeepInZoneInfo
 
 class PrintLMCPObject(IDataReceived):
     def dataReceived(self, lmcpObject):
@@ -48,13 +49,17 @@ class SampleHazardDetector(IDataReceived):
         self.__uavsLoiter = {}
         self.__estimatedHazardZone = Polygon()
         self.drones = State.State()
+        self.keepInZone = KeepInZoneInfo.KeepInZone()
 
     def dataReceived(self, lmcpObject):
         if isinstance(lmcpObject, AirVehicleState):
-            self.drones.addNewUAV_State(lmcpObject)
+            self.drones.updateUAV(lmcpObject)
 
         if isinstance(lmcpObject, AirVehicleConfiguration):
-            self.drones.addNewUAV_Configuration(lmcpObject)
+            self.drones.addNewUAV(lmcpObject)
+
+        if isinstance(lmcpObject, KeepInZone):
+            self.keepInZone.updateKeepInZone(lmcpObject)
 
         if isinstance(lmcpObject, HazardZoneDetection):
             hazardDetected = lmcpObject

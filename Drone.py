@@ -43,6 +43,7 @@ class Drone():
         self.MaxAltitudeType = None
 
         # Gimbal
+        self.GimbalPayloadID = -1
         self.GimbalPointingMode = None
         self.GimbalAzimuth = -1
         self.GimbalElevation = -1
@@ -61,6 +62,7 @@ class Drone():
         self.GimbalMaxRotationRate = -1
 
         # Camera
+        self.CameraPayloadID = -1
         self.CameraPointingMode = None
         self.CameraAzimuth = -1
         self.CameraElevation = -1
@@ -76,6 +78,7 @@ class Drone():
         self.CameraVideoStreamVerticalResolution = -1
 
         # Hazard sensor
+        self.HazardPayloadID = -1
         self.HazardAzimuth = -1
         self.HazardElevation = -1
         self.HazardRotation = -1
@@ -202,6 +205,9 @@ class Drone():
     def getMaxAltitudeType(self):
         return self.MaxAltitudeType
 
+    def getGimbalPayloadID(self):
+        return self.GimbalPayloadID
+
     def getGimbalPointingMode(self):
         return self.GimbalPointingMode
 
@@ -250,6 +256,9 @@ class Drone():
     def getGimbalMaxRotationRate(self):
         return self.GimbalMaxRotationRate
 
+    def getCameraPayloadID(self):
+        return self.CameraPayloadID
+
     def getCameraPointingMode(self):
         return self.CameraPointingMode
 
@@ -288,6 +297,9 @@ class Drone():
 
     def getCameraVideoStreamVerticalResolution(self):
         return self.CameraVideoStreamVerticalResolution
+
+    def getHazardPayloadID(self):
+        return self.HazardPayloadID
 
     def getHazardAzimuth(self):
         return self.HazardAzimuth
@@ -435,6 +447,9 @@ class Drone():
     def setMaxAltitudeType(self, newMaxAltitudeType):
         self.MaxAltitudeType = newMaxAltitudeType
 
+    def setGimbalPayloadID(self, newGimbalPayloadID):
+        self.GimbalPayloadID = newGimbalPayloadID
+
     def setGimbalPointingMode(self, newGimbalPointingMode):
         self.GimbalPointingMode = newGimbalPointingMode
 
@@ -483,6 +498,9 @@ class Drone():
     def setGimbalMaxRotationRate(self, newGimbalMaxRotationRate):
         self.GimbalMaxRotationRate = newGimbalMaxRotationRate
 
+    def setCameraPayloadID(self, newCameraPayloadID):
+        self.CameraPayloadID = newCameraPayloadID
+
     def setCameraPointingMode(self, newCameraPointingMode):
         self.CameraPointingMode = newCameraPointingMode
 
@@ -521,6 +539,9 @@ class Drone():
 
     def setCameraVideoStreamVerticalResolution(self, newCameraVideoStreamVerticalResolution):
         self.CameraVideoStreamVerticalResolution = newCameraVideoStreamVerticalResolution
+
+    def setHazardPayloadID(self, newHazardPayloadID):
+        self.HazardPayloadID = newHazardPayloadID
 
     def setHazardAzimuth(self, newHazardAzimuth):
         self.HazardAzimuth = newHazardAzimuth
