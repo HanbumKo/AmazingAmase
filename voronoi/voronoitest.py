@@ -3,7 +3,7 @@ import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 from scipy.spatial import Voronoi
 import math
-import time
+
 
 def voronoi_finite_polygons_2d(vor, radius=None):
     """
