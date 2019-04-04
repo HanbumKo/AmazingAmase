@@ -318,235 +318,235 @@ class Drone():
 
     # ===============================
 
-    def setID(self):
-        return self.ID
+    def setID(self, newID):
+        self.ID = newID
 
-    def setU(self):
-        return self.u
+    def setU(self, newU):
+        self.u = newU
 
-    def setV(self):
-        return self.v
+    def setV(self, newV):
+        self.v = newV
 
-    def setW(self):
-        return self.v
+    def setW(self, newW):
+        self.v = newW
 
-    def setUdot(self):
-        return self.Udot
+    def setUdot(self, newUdot):
+        self.Udot = newUdot
 
-    def setVdot(self):
-        return self.Vdot
+    def setVdot(self, newVdot):
+        self.Vdot = newVdot
 
-    def setWdot(self):
-        return self.Wdot
+    def setWdot(self, newWdot):
+        self.Wdot = newWdot
 
-    def setHeading(self):
-        return self.Heading
+    def setHeading(self, newHeading):
+        self.Heading = newHeading
 
-    def setPitch(self):
-        return self.Pitch
+    def setPitch(self, newPitch):
+        self.Pitch = newPitch
 
-    def setRoll(self):
-        return self.Roll
+    def setRoll(self, newRoll):
+        self.Roll = newRoll
 
-    def setP(self):
-        return self.p
+    def setP(self, newP):
+        self.p = newP
 
-    def setQ(self):
-        return self.q
+    def setQ(self, newQ):
+        self.q = newQ
 
-    def setR(self):
-        return self.r
+    def setR(self, newR):
+        self.r = newR
 
-    def setCourse(self):
-        return self.Course
+    def setCourse(self, newCourse):
+        self.Course = newCourse
 
-    def setGroundspeed(self):
-        return self.Groundspeed
+    def setGroundspeed(self, newGroundspeed):
+        self.Groundspeed = newGroundspeed
 
-    def setLatitude(self):
-        return self.Latitude
+    def setLatitude(self, newLatitude):
+        self.Latitude = newLatitude
 
-    def setLongitude(self):
-        return self.Longitude
+    def setLongitude(self, newLongitude):
+        self.Longitude = newLongitude
 
-    def setAltitude(self):
-        return self.Altitude
+    def setAltitude(self, newAltitude):
+        self.Altitude = newAltitude
 
-    def setAltitudeType(self):
-        return self.AltitudeType
+    def setAltitudeType(self, newAltitudeType):
+        self.AltitudeType = newAltitudeType
 
-    def setEnergyAvailable(self):
-        return self.EnergyAvailable
+    def setEnergyAvailable(self, newEnergyAvailable):
+        self.EnergyAvailable = newEnergyAvailable
 
-    def setActualEnergyRate(self):
-        return self.ActualEnergyRate
+    def setActualEnergyRate(self, newActualEnergyRate):
+        self.ActualEnergyRate = newActualEnergyRate
 
-    def setCurrentWaypoint(self):
-        return self.CurrentWaypoint
+    def setCurrentWaypoint(self, newCurrentWaypoint):
+        self.CurrentWaypoint = newCurrentWaypoint
 
-    def setCurrentCommand(self):
-        return self.CurrentCommand
+    def setCurrentCommand(self, newCurrentCommand):
+        self.CurrentCommand = newCurrentCommand
 
-    def setMode(self):
-        return self.Mode
+    def setMode(self, newMod):
+        self.Mode = newMod
 
-    def setTime(self):
-        return self.Time
+    def setTime(self, newTime):
+        self.Time = newTime
 
-    def setAirspeed(self):
-        return self.Airspeed
+    def setAirspeed(self, newAirspeed):
+        self.Airspeed = newAirspeed
 
-    def setVerticalSpeed(self):
-        return self.VerticalSpeed
+    def setVerticalSpeed(self, newVerticalSpeed):
+        self.VerticalSpeed = newVerticalSpeed
 
-    def setWindSpeed(self):
-        return self.WindSpeed
+    def setWindSpeed(self, newWindSpeed):
+        self.WindSpeed = newWindSpeed
 
-    def setWindDirection(self):
-        return self.WindDirection
+    def setWindDirection(self, newWindDirection):
+        self.WindDirection = newWindDirection
 
-    def setLabel(self):
-        return self.Label
+    def setLabel(self, newLabel):
+        self.Label = newLabel
 
-    def setNominalSpeed(self):
-        return self.NominalSpeed
+    def setNominalSpeed(self, newNominalSpeed):
+        self.NominalSpeed = newNominalSpeed
 
-    def setNominalAltitude(self):
-        return self.NominalAltitude
+    def setNominalAltitude(self, newNominalAltitude):
+        self.NominalAltitude = newNominalAltitude
 
-    def setNominalAltitudeType(self):
-        return self.NominalAltitudeType
+    def setNominalAltitudeType(self, newNominalAltitudeType):
+        self.NominalAltitudeType = newNominalAltitudeType
 
-    def setMinimumSpeed(self):
-        return self.MinimumSpeed
+    def setMinimumSpeed(self, newMinimumSpeed):
+        self.MinimumSpeed = newMinimumSpeed
 
-    def setMaximumSpeed(self):
-        return self.MaximumSpeed
+    def setMaximumSpeed(self, newMaximumSpeed):
+        self.MaximumSpeed = newMaximumSpeed
 
-    def setMinimumAltitude(self):
-        return self.MinimumAltitude
+    def setMinimumAltitude(self, newMinimumAltitude):
+        self.MinimumAltitude = newMinimumAltitude
 
-    def setMinAltitudeType(self):
-        return self.MinAltitudeType
+    def setMinAltitudeType(self, newMinAltitudeType):
+        self.MinAltitudeType = newMinAltitudeType
 
-    def setMaximumAltitude(self):
-        return self.MaximumAltitude
+    def setMaximumAltitude(self, newMaximumAltitude):
+        self.MaximumAltitude = newMaximumAltitude
 
-    def setMaxAltitudeType(self):
-        return self.MaxAltitudeType
+    def setMaxAltitudeType(self, newMaxAltitudeType):
+        self.MaxAltitudeType = newMaxAltitudeType
 
-    def setGimbalPointingMode(self):
-        return self.GimbalPointingMode
+    def setGimbalPointingMode(self, newGimbalPointingMode):
+        self.GimbalPointingMode = newGimbalPointingMode
 
-    def setGimbalAzimuth(self):
-        return self.GimbalAzimuth
+    def setGimbalAzimuth(self, newGimbalAzimuth):
+        self.GimbalAzimuth = newGimbalAzimuth
 
-    def setGimbalElevation(self):
-        return self.GimbalElevation
+    def setGimbalElevation(self, newGimbalElevation):
+        self.GimbalElevation = newGimbalElevation
 
-    def setGimbalRotation(self):
-        return self.GimbalRotation
+    def setGimbalRotation(self, newGimbalRotation):
+        self.GimbalRotation = newGimbalRotation
 
-    def setGimbalMinAzimuth(self):
-        return self.GimbalMinAzimuth
+    def setGimbalMinAzimuth(self, newGImbalMinAzimuth):
+        self.GimbalMinAzimuth = newGImbalMinAzimuth
 
-    def setGimbalMaxAzimuth(self):
-        return self.GimbalMaxAzimuth
+    def setGimbalMaxAzimuth(self, newGimbalMaxAzimuth):
+        self.GimbalMaxAzimuth = newGimbalMaxAzimuth
 
-    def setGimbalIsAzimuthClamped(self):
-        return self.GimbalIsAzimuthClamped
+    def setGimbalIsAzimuthClamped(self, newGimbalIsAzimuthClamped):
+        self.GimbalIsAzimuthClamped = newGimbalIsAzimuthClamped
 
-    def setGimbalMinElevation(self):
-        return self.GimbalMinElevation
+    def setGimbalMinElevation(self, newGimbalMinElevation):
+        self.GimbalMinElevation = newGimbalMinElevation
 
-    def setGimbalMaxElevation(self):
-        return self.GimbalMaxElevation
+    def setGimbalMaxElevation(self, newGimbalMaxElevation):
+        self.GimbalMaxElevation = newGimbalMaxElevation
 
-    def setGimbalIsElevationClamped(self):
-        return self.GimbalIsElevationClamped
+    def setGimbalIsElevationClamped(self, newGimbalIsElevationClamped):
+        self.GimbalIsElevationClamped = newGimbalIsElevationClamped
 
-    def setGimbalMinRotation(self):
-        return self.GimbalMinRotation
+    def setGimbalMinRotation(self, newGimbalMinRotation):
+        self.GimbalMinRotation = newGimbalMinRotation
 
-    def setGimbalMaxRotation(self):
-        return self.GimbalMaxRotation
+    def setGimbalMaxRotation(self, newGimbalMaxRotation):
+        self.GimbalMaxRotation = newGimbalMaxRotation
 
-    def setGimbalIsRotationClamped(self):
-        return self.GimbalIsRotationClamped
+    def setGimbalIsRotationClamped(self, newGimbalIsRotationClamped):
+        self.GimbalIsRotationClamped = newGimbalIsRotationClamped
 
-    def setGimbalMaxAzimuthSlewRate(self):
-        return self.GimbalMaxAzimuthSlewRate
+    def setGimbalMaxAzimuthSlewRate(self, newGimbalMaxAzimuthSlewRate):
+        self.GimbalMaxAzimuthSlewRate = newGimbalMaxAzimuthSlewRate
 
-    def setGimbalMaxElevationSlewRate(self):
-        return self.GimbalMaxElevationSlewRate
+    def setGimbalMaxElevationSlewRate(self, newGimbalMaxElevationSlewRate):
+        self.GimbalMaxElevationSlewRate = newGimbalMaxElevationSlewRate
 
-    def setGimbalMaxRotationRate(self):
-        return self.GimbalMaxRotationRate
+    def setGimbalMaxRotationRate(self, newGimbalMaxRotationRate):
+        self.GimbalMaxRotationRate = newGimbalMaxRotationRate
 
-    def setCameraPointingMode(self):
-        return self.CameraPointingMode
+    def setCameraPointingMode(self, newCameraPointingMode):
+        self.CameraPointingMode = newCameraPointingMode
 
-    def setCameraAzimuth(self):
-        return self.CameraAzimuth
+    def setCameraAzimuth(self, newCameraAzimuth):
+        self.CameraAzimuth = newCameraAzimuth
 
-    def setCameraElevation(self):
-        return self.CameraElevation
+    def setCameraElevation(self, newCameraElevation):
+        self.CameraElevation = newCameraElevation
 
-    def setCameraRotation(self):
-        return self.CameraRotation
+    def setCameraRotation(self, newCameraRotation):
+        self.CameraRotation = newCameraRotation
 
-    def setCameraHorizontalFieldOfView(self):
-        return self.CameraHorizontalFieldOfView
+    def setCameraHorizontalFieldOfView(self, newCameraHorizontalFieldOfView):
+        self.CameraHorizontalFieldOfView = newCameraHorizontalFieldOfView
 
-    def setCameraVerticalFieldOfView(self):
-        return self.CameraVerticalFieldOfView
+    def setCameraVerticalFieldOfView(self, newCameraVerticalFieldOfView):
+        self.CameraVerticalFieldOfView = newCameraVerticalFieldOfView
 
-    def setCameraCenterpoint(self):
-        return self.CameraCenterpoint
+    def setCameraCenterpoint(self, newCameraCenterpoint):
+        self.CameraCenterpoint = newCameraCenterpoint
 
-    def setCameraSupportedWavelengthBand(self):
-        return self.CameraSupportedWavelengthBand
+    def setCameraSupportedWavelengthBand(self, newCameraSupportedWavelengthBand):
+        self.CameraSupportedWavelengthBand = newCameraSupportedWavelengthBand
 
-    def setCameraFieldOfViewMode(self):
-        return self.CameraFieldOfViewMode
+    def setCameraFieldOfViewMode(self, newCameraFieldOfViewMode):
+        self.CameraFieldOfViewMode = newCameraFieldOfViewMode
 
-    def setCameraMinHorizontalFieldOfView(self):
-        return self.CameraMinHorizontalFieldOfView
+    def setCameraMinHorizontalFieldOfView(self, newCameraMinHorizontalFieldOfView):
+        self.CameraMinHorizontalFieldOfView = newCameraMinHorizontalFieldOfView
 
-    def setCameraMaxHorizontalFieldOfView(self):
-        return self.CameraMaxHorizontalFieldOfView
+    def setCameraMaxHorizontalFieldOfView(self, newCameraMaxHorizontalFieldOfView):
+        self.CameraMaxHorizontalFieldOfView = newCameraMaxHorizontalFieldOfView
 
-    def setCameraVideoStreamHorizontalResolution(self):
-        return self.CameraVideoStreamHorizontalResolution
+    def setCameraVideoStreamHorizontalResolution(self, newCameraVideoStreamHorizontalResolution):
+        self.CameraVideoStreamHorizontalResolution = newCameraVideoStreamHorizontalResolution
 
-    def setCameraVideoStreamVerticalResolution(self):
-        return self.CameraVideoStreamVerticalResolution
+    def setCameraVideoStreamVerticalResolution(self, newCameraVideoStreamVerticalResolution):
+        self.CameraVideoStreamVerticalResolution = newCameraVideoStreamVerticalResolution
 
-    def setHazardAzimuth(self):
-        return self.HazardAzimuth
+    def setHazardAzimuth(self, newHazardAzimuth):
+        self.HazardAzimuth = newHazardAzimuth
 
-    def setHazardElevation(self):
-        return self.HazardElevation
+    def setHazardElevation(self, newHazardElevation):
+        self.HazardElevation = newHazardElevation
 
-    def setHazardRotation(self):
-        return self.HazardRotation
+    def setHazardRotation(self, newHazardRotation):
+        self.HazardRotation = newHazardRotation
 
-    def setHazardHorizontalFieldOfView(self):
-        return self.HazardHorizontalFieldOfView
+    def setHazardHorizontalFieldOfView(self, newHazardHorizontalFieldOfView):
+        self.HazardHorizontalFieldOfView = newHazardHorizontalFieldOfView
 
-    def setHazardVerticalFieldOfView(self):
-        return self.HazardVerticalFieldOfView
+    def setHazardVerticalFieldOfView(self, newHazardVerticalFieldOfView):
+        self.HazardVerticalFieldOfView = newHazardVerticalFieldOfView
 
-    def setHazardCenterpoint(self):
-        return self.HazardCenterpoint
+    def setHazardCenterpoint(self, newHazardCenterpoint):
+        self.HazardCenterpoint = newHazardCenterpoint
 
-    def setHazardMaxRange(self):
-        return self.HazardMaxRange
+    def setHazardMaxRange(self, newHazardMaxRange):
+        self.HazardMaxRange = newHazardMaxRange
 
-    def setHazardHorizontalFOV(self):
-        return self.HazardHorizontalFOV
+    def setHazardHorizontalFOV(self, newHazardHorizontalFOV):
+        self.HazardHorizontalFOV = newHazardHorizontalFOV
 
-    def setHazardVerticalFOV(self):
-        return self.HazardVerticalFOV
+    def setHazardVerticalFOV(self, newHazardVerticalFOV):
+        self.HazardVerticalFOV = newHazardVerticalFOV
 
 

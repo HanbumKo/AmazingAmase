@@ -83,18 +83,18 @@ class State():
         droneObject.setW(AirVehicleState.get_w())
         droneObject.setWdot(AirVehicleState.get_wdot())
 
-    def addNewUAV_Configuration(self, AirVehicleConfiguration):
+    def addNewUAV_Configuration(self, lmcpObject):
         newDrone = Drone.Drone()
-        newDrone.setID(AirVehicleConfiguration.get_ID())
-        newDrone.setMaximumSpeed(AirVehicleConfiguration.get_MaximumSpeed())
-        newDrone.setLabel(AirVehicleConfiguration.get_Label())
-        newDrone.setMaxAltitudeType(AirVehicleConfiguration.get_MaxAltitudeType())
-        newDrone.setMaximumAltitude(AirVehicleConfiguration.get_MaximumAltitude())
-        newDrone.setMinAltitudeType(AirVehicleConfiguration.get_MinAltitudeType())
-        newDrone.setMinimumAltitude(AirVehicleConfiguration.get_MinimumAltitude())
-        newDrone.setMinimumSpeed(AirVehicleConfiguration.get_MinimumSpeed())
-        newDrone.setNominalAltitude(AirVehicleConfiguration.get_NominalAltitude())
-        newDrone.setNominalAltitudeType(AirVehicleConfiguration.get_NominalAltitudeType())
+        newDrone.setID(lmcpObject.get_ID())
+        newDrone.setMaximumSpeed(lmcpObject.get_MaximumSpeed())
+        newDrone.setLabel(lmcpObject.get_Label())
+        newDrone.setMaxAltitudeType(lmcpObject.get_MaxAltitudeType())
+        newDrone.setMaximumAltitude(lmcpObject.get_MaximumAltitude())
+        newDrone.setMinAltitudeType(lmcpObject.get_MinAltitudeType())
+        newDrone.setMinimumAltitude(lmcpObject.get_MinimumAltitude())
+        newDrone.setMinimumSpeed(lmcpObject.get_MinimumSpeed())
+        newDrone.setNominalAltitude(lmcpObject.get_NominalAltitude())
+        newDrone.setNominalAltitudeType(lmcpObject.get_NominalAltitudeType())
 
         self.numOfDrone = self.numOfDrone + 1
         self.uavList[AirVehicleState.get_ID()] = newDrone
