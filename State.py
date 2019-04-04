@@ -97,8 +97,8 @@ class State():
         newDrone.setNominalAltitudeType(lmcpObject.get_NominalAltitudeType())
 
         self.numOfDrone = self.numOfDrone + 1
-        self.uavList[AirVehicleState.get_ID()] = newDrone
-        print("UAV ", AirVehicleState.get_ID(), " is added to uavList")
+        self.uavList[lmcpObject.get_ID()] = newDrone
+        print("UAV ", lmcpObject.get_ID(), " is added to uavList")
 
 
 
