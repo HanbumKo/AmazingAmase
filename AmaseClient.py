@@ -55,13 +55,13 @@ class SampleHazardDetector(IDataReceived):
         if isinstance(lmcpObject, AirVehicleState):
             self.drones.updateUAV(lmcpObject)
 
-        if isinstance(lmcpObject, AirVehicleConfiguration):
+        elif isinstance(lmcpObject, AirVehicleConfiguration):
             self.drones.addNewUAV(lmcpObject)
 
-        if isinstance(lmcpObject, KeepInZone):
+        elif isinstance(lmcpObject, KeepInZone):
             self.keepInZone.updateKeepInZone(lmcpObject)
 
-        if isinstance(lmcpObject, HazardZoneDetection):
+        elif isinstance(lmcpObject, HazardZoneDetection):
             hazardDetected = lmcpObject
             #Get location where zone first detected
             detectedLocation = hazardDetected.get_DetectedLocation()
