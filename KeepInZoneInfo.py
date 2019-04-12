@@ -35,7 +35,7 @@ from afrl.cmasi.perceive.EntityPerception import EntityPerception
 from afrl.cmasi.EntityConfiguration import EntityConfiguration
 
 
-class KeepInZone():
+class KeepInZoneInfo():
     def __init__(self):
         self.ZoneID = -1
         self.MinAltitude = -1
@@ -130,23 +130,22 @@ class KeepInZone():
 
 
     def updateKeepInZone(self, KeepInZone):
-        KeepInZone.get_MinAltitudeType()
-        KeepInZone.get_MinAltitude()
-        KeepInZone.get_MaxAltitudeType()
-        KeepInZone.get_MaxAltitude()
-        KeepInZone.get_Label()
-        KeepInZone.get_Boundary()
-        KeepInZone.get_AffectedAircraft()
-        KeepInZone.get_EndTime()
-        KeepInZone.get_Padding()
-        KeepInZone.get_StartTime()
-        KeepInZone.get_ZoneID()
-        KeepInZone.get_Boundary().get_CenterPoint().get_Latitude()
-        KeepInZone.get_Boundary().get_CenterPoint().get_Longitude()
-        KeepInZone.get_Boundary().get_CenterPoint().get_Altitude()
-        KeepInZone.get_Boundary().get_CenterPoint().get_AltitudeType()
-        KeepInZone.get_Boundary().get_Width()
-        KeepInZone.get_Boundary().get_Height()
-        KeepInZone.get_Boundary().get_Rotation()
+        self.setMinAltitudeType(KeepInZone.get_MinAltitudeType())
+        self.setMinAltitude(KeepInZone.get_MinAltitude())
+        self.setMaxAltitudeType(KeepInZone.get_MaxAltitudeType())
+        self.setMaxAltitude(KeepInZone.get_MaxAltitude())
+        self.setLabel(KeepInZone.get_Label())
+        self.setAffctedAircraft(KeepInZone.get_AffectedAircraft())
+        self.setEndTime(KeepInZone.get_EndTime())
+        self.setPadding(KeepInZone.get_Padding())
+        self.setStartTime(KeepInZone.get_StartTime())
+        self.setZoneID(KeepInZone.get_ZoneID())
+        self.setCenterLatitude(KeepInZone.get_Boundary().get_CenterPoint().get_Latitude())
+        self.setCenterLongitude(KeepInZone.get_Boundary().get_CenterPoint().get_Longitude())
+        self.setCenterAltitude(KeepInZone.get_Boundary().get_CenterPoint().get_Altitude())
+        self.setCenterAltitudeType(KeepInZone.get_Boundary().get_CenterPoint().get_AltitudeType())
+        self.setWidth(KeepInZone.get_Boundary().get_Width())
+        self.setHeight(KeepInZone.get_Boundary().get_Height())
+        self.setRotation(KeepInZone.get_Boundary().get_Rotation())
         print("Keep In Zone is updated")
 
