@@ -313,7 +313,7 @@ class drawvoronoi():
 
         return distance_idx
 
-    def delaunayalgo(self):
+    def voronoialgo(self):
 
         sx = self.points[2][0]
         lx = self.points[0][0]
@@ -508,7 +508,7 @@ if __name__ == '__main__':
     pointlist = np.array(pointlist)
 
     voro = drawvoronoi(pointlist, nk, nc, numberofdroneeachrecoveryzone)
-    voro.delaunayalgo()
+    voro.voronoialgo()
     # try:
     #     voro.delaunayalgo()
     # except:

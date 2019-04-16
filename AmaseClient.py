@@ -37,6 +37,7 @@ from afrl.cmasi.EntityConfiguration import EntityConfiguration
 import Drone
 import State
 import KeepInZoneInfo
+import RecoveryZoneInfo
 
 class PrintLMCPObject(IDataReceived):
     def dataReceived(self, lmcpObject):
@@ -49,7 +50,8 @@ class SampleHazardDetector(IDataReceived):
         self.__uavsLoiter = {}
         self.__estimatedHazardZone = Polygon()
         self.drones = State.State()
-        self.keepInZone = KeepInZoneInfo.KeepInZone()
+        self.keepInZone = KeepInZoneInfo.KeepInZoneInfo()
+        self.recoveryList = []
 
     def dataReceived(self, lmcpObject):
         if isinstance(lmcpObject, AirVehicleState):
@@ -80,6 +82,11 @@ class SampleHazardDetector(IDataReceived):
 
                 self.__uavsLoiter[detectingEntity] = True
                 print('UAV' + str(detectingEntity) + ' detected hazard at ' + str(detectedLocation.get_Latitude()) + ',' + str(detectedLocation.get_Longitude()) + '. Sending loiter command.');
+
+        elif isinstance(lmcpObject, RecoveryPoint):
+            recoveryZone = RecoveryZoneInfo.RecoveryZoneInfo()
+            recoveryZone.updateRecoveryZone(lmcpObject)
+            self.recoveryList.append(recoveryZone)
 
     def sendLoiterCommand(self, vehicleId, location):
         #Setting up the mission to send to the UAV
