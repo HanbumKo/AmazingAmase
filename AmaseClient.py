@@ -34,10 +34,12 @@ from afrl.cmasi.RemoveEntities import RemoveEntities
 from afrl.cmasi.perceive.EntityPerception import EntityPerception
 from afrl.cmasi.EntityConfiguration import EntityConfiguration
 
+import Utils
 import Drone
 import State
 import KeepInZoneInfo
 import RecoveryZoneInfo
+import Enum
 
 class PrintLMCPObject(IDataReceived):
     def dataReceived(self, lmcpObject):
@@ -49,13 +51,34 @@ class SampleHazardDetector(IDataReceived):
         self.__client = tcpClient
         self.__uavsLoiter = {}
         self.__estimatedHazardZone = Polygon()
-        self.drones = State.State()
+        self.utils = Utils.Utils(tcpClient)
+        self.drones = State.State(self.utils)
         self.keepInZone = KeepInZoneInfo.KeepInZoneInfo()
         self.recoveryList = []
+        self.uavInfo
 
     def dataReceived(self, lmcpObject):
         if isinstance(lmcpObject, AirVehicleState):
             self.drones.updateUAV(lmcpObject)
+
+            # make a command for drones, heading, azimuth update
+            self.drones.updateUavAction(lmcpObject.get_ID())
+
+            # find nice altitude
+            heading, azimuth, elevation, altitude = self.drones.getUpdateInfos(lmcpObject.get_ID())
+            
+            # wind affect
+            self.drones.moveFirezoneByWind(lmcpObject.getID())
+
+            # send cmd to drone
+            self.utils.sendHeadingAndAltitudeCmd(lmcpObject.get_ID(), heading, altitude)
+
+            if type(azimuth) == dict:
+                self.utils.sendGimbalAzimuthAndElevationScanCmd(
+                    lmcpObject.get_ID(), azimuth.start, azimuth.end, azimuth.rate,
+                    elevation, elevation, 0, 0)
+            else :
+                self.utils.sendGimbalAzimuthAndElevationCmd(lmcpObject.get_ID(), azimuth, elevation)
 
         elif isinstance(lmcpObject, AirVehicleConfiguration):
             self.drones.addNewUAV(lmcpObject)
@@ -64,6 +87,7 @@ class SampleHazardDetector(IDataReceived):
             self.keepInZone.updateKeepInZone(lmcpObject)
 
         elif isinstance(lmcpObject, HazardZoneDetection):
+            # detection !!! 
             hazardDetected = lmcpObject
             #Get location where zone first detected
             detectedLocation = hazardDetected.get_DetectedLocation()
@@ -78,7 +102,7 @@ class SampleHazardDetector(IDataReceived):
                 self.__estimatedHazardZone.get_BoundaryPoints().append(detectedLocation)
 
                 #Send out the estimation report to draw the polygon
-                self.sendEstimateReport();
+                self.sendEstimateReport()
 
                 self.__uavsLoiter[detectingEntity] = True
                 print('UAV' + str(detectingEntity) + ' detected hazard at ' + str(detectedLocation.get_Latitude()) + ',' + str(detectedLocation.get_Longitude()) + '. Sending loiter command.');

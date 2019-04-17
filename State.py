@@ -35,17 +35,27 @@ from afrl.cmasi.perceive.EntityPerception import EntityPerception
 from afrl.cmasi.EntityConfiguration import EntityConfiguration
 
 import Drone
+import Enum
+import Utils
+import InitialSearch
+import Tracking
+import DetectedZone
 
+import sys
 
 """
 State class manage all of drones efficiently. This must be implemented easy to see, easy to use.
 The drone's ID could be different from come order. Dictionary can find drone object fast using each ID.
 """
 class State():
-    def __init__(self):
+    def __init__(self, utils):
         self.uavList = {} # Dictionary
         self.numOfDrone = 0
-
+        self.utils = utils
+        self.initialSearch = InitialSearch.InitialSearch(utils)
+        self.tracking = Tracking.Tracking(utils)
+        self.detectedZones = DetectedZone.DetectedZone()
+        
     def updateUAV(self, AirVehicleState):
         ID = AirVehicleState.get_ID()
         droneObject = {}
@@ -53,7 +63,7 @@ class State():
             print("Error : UAV ", ID, " is not in uavList")
             exit()
         else:
-            droneObject = self.uavList[ID]
+            droneObject = self.uavList[ID].OBJ
         droneObject.setWindDirection(AirVehicleState.get_WindDirection())
         droneObject.setID(AirVehicleState.get_ID())
         droneObject.setWindSpeed(AirVehicleState.get_WindSpeed())
@@ -116,6 +126,33 @@ class State():
 
 
     def addNewUAV(self, AirVehicleConfiguration):
+        newDroneDict = {}
+        newDroneDict['STATE'] = Enum.STATE_ALIVE
+        newDroneDict['ACTION'] = Enum.ACTION_WELCOME
+        newDroneDict['ACTION_DETAIL'] = {
+            'SEARCH' : {
+                'search_way' : 0,
+                'current_index' : 0,
+                'next_heading' : 0,
+                'total_points' : []
+            },
+            'TRACKING' : {
+                'msg' : 0,
+                'tracking_direction' : 0,
+                'tracking_zoneID' : 0,
+                'last_tracking_time' : 0,
+                'next_heading' : 0,
+                'next_azimuth' : 0
+            },
+            'CHARGING' : {
+                'recovery_point' : 0
+            }
+        }
+        newDroneDict['NEXT_HEADING'] = 0
+        newDroneDict['NEXT_ALTITUDE'] = 0
+        newDroneDict['NEXT_AZIMUTH'] = 0
+        newDroneDict['NEXT_ELEVATION'] = 0
+        
         newDrone = Drone.Drone()
         newDrone.setID(AirVehicleConfiguration.get_ID())
         newDrone.setMaximumSpeed(AirVehicleConfiguration.get_MaximumSpeed())
@@ -159,10 +196,112 @@ class State():
         newDrone.setHazardHorizontalFOV(AirVehicleConfiguration.get_PayloadConfigurationList()[2].get_HorizontalFOV())
         newDrone.setHazardVerticalFOV(AirVehicleConfiguration.get_PayloadConfigurationList()[2].get_VerticalFOV())
 
+        newDroneDict['OBJ'] = newDrone
+
         self.numOfDrone = self.numOfDrone + 1
-        self.uavList[AirVehicleConfiguration.get_ID()] = newDrone
+        self.uavList[AirVehicleConfiguration.get_ID()] = newDroneDict
         print("UAV ", AirVehicleConfiguration.get_ID(), " is added to uavList")
 
 
+    def updateUavAction(self, tcpClient, uavId):
+        action = self.uavList[uavId].ACTION
+
+        # state check
+        if action == Enum.ACTION_WELCOME:
+            # At first time, all drones will be ACTION_WELCOME, and all drones will start initial searching 
+            pass
+        elif action == Enum.ACTION_SEARCHING:
+            # search for fire-zone and entity
+            # update action_detail.
+            initialSearch.updateSearchingPoint(self.uavList[uavId])
+        elif action == Enum.ACTION_TRACKING:
+            # tracking a fire-zone
+            # still is tracking
+            tracking.updateTrackingState(self.uavList(uavId))
+        elif action == Enum.ACTION_CHARGING:
+            # going to recovery-zone
+            # still is charging
+            # charging
+            pass
+
+    def getUpdateInfos(self, uavId):
+        self.getElevAndAlti(uavId)
+        return self.uavList[uavId].NEXT_HEADING, self.uavList[uavId].NEXT_AZIMUTH, self.uavList[uavId].NEXT_ELEVATION, self.uavList[uavId].NEXT_ALTITUDE
+
+    def getElevAndAlti(self, uavId):
+        # terrain
+        uavInfos = self.uavList[uavId]
+        uav_lat = uavInfos.OBJ.getLatitude()
+        uav_lon = uavInfos.OBJ.getLongitude()
+        paddingAlt = uavInfos.OBJ.getHazardMaxRange()*0.5
+        idealDist = uavInfos.OBJ.getHazardMaxRange()*0.7
+        action = uavInfos.ACTION
+
+        front_Alt = 0
+        next_Alt = self.utils.getElevation(uav_lat, uav_lon) + paddingAlt
 
 
+        if action == Enum.ACTION_SEARCHING: #searching
+            front_Alt = uavInfos.getCameraCenterpoint().get_Altitude()
+        else :  # ETC.
+            coord = self.utils.getLatLon(uav_lat, uav_lon, idealDist, self.__originalDirection)
+            front_Alt = self.utils.getElevation(coord[0], coord[1])
+
+        # Q1. how does the gimbal angle adjust in front altitude higher than now.
+        alt_gap = uavInfos.getAltitude()- front_Alt
+
+        if alt_gap <= idealDist :
+            uavInfos.NEXT_ELEVATION = self.utils.getTheta(idealDist,uavInfos.OBJ.getHazardMaxRange())
+            # print("optmial theta is ", self.__theta)
+
+        elif alt_gap < uavInfos.OBJ.getHazardMaxRange() :
+            uavInfos.NEXT_ELEVATION = self.utils.getTheta(alt_gap, uavInfos.OBJ.getHazardMaxRange())
+
+    def moveFirezoneByWind(self, uavId):
+        if self.uavList.keys()[-1] == uavId :
+            # zone move
+            wind_speed = self.uavList[uavId].getWindSpeed()
+            wind_direction = self.uavList[uavId].getWindDirection()
+            mDist = wind_speed*0.5
+
+            # moving
+            for zone in self.detectedZones.getDetectedZones().values():
+                for i in zone:
+                    coord = self.utils.getLatLon(i.get_Latitude(), i.get_Longitude(), mDist, 180 + wind_direction )
+                    # [lat, lon]
+                    i.set_Latitude(coord[0])
+                    i.set_Longitude(coord[1])
+
+    def setNewDroneAction(self, uavId):
+        # made right before after initial searching 
+        deadList = [k for k,v in self.uavList.items() if v.STATE == Enum.STATE_DEAD ]
+
+        if deadList.count() == 0:
+            # initial searching
+            self.setBestPlaceToSearch(uavId)
+        else :
+            # take over dead drone's action.
+            # 1. find nicest actino by time to start new ACTION
+            dist = float('inf')
+            for i in deadList:
+                # tracking or searching
+                if self.getDist(uavId, i) < dist :
+                    self.uavList[uavId].ACTION = self.uavList[i].ACTION
+                    self.uavList[uavId].ACTION_DETAIL = self.uavList[i].ACTION_DETAIL
+
+        self.startSearching(uavId)
+
+    def setBestPlaceToSearch(self, uavId):
+        pass
+
+    def startSearching(self, uavId):
+        pass
+
+    def getDist(self, uavId1, uavId2):
+        lat1 = self.uavList[uavId1].OBJ.get_Latitude()
+        lon1 = self.uavList[uavId1].OBJ.get_Longitude()
+        
+        lat2 = self.uavList[uavId2].OBJ.get_Latitude()
+        lon2 = self.uavList[uavId2].OBJ.get_Longitude()
+
+        return self.utils.distance(lon1, lat2, lon2, lat2)
