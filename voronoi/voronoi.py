@@ -3,18 +3,28 @@ import matplotlib.pyplot as plt
 from scipy.spatial import Delaunay
 from scipy.spatial import Voronoi, voronoi_plot_2d
 import math
+import sys
+
 from scipy.spatial import ConvexHull
 import time
 
 class drawvoronoi():
 
-    def __init__(self, pointlist, number_keepinzone, number_recoveryzone, numberofdroneeachrecoveryzone):
+    def __init__(self, pointlist, number_keepinzone, number_recoveryzone, numberofdroneeachrecoveryzone, startway):
         self.points = pointlist
         self.number_keepinzone = number_keepinzone
         self.number_recoveryzone = number_recoveryzone
         self.number_drone_each_recoveryzone = numberofdroneeachrecoveryzone
-        self.adjusted_coord = []
-        self.adjusted_arealist = []
+        self.searchcoord = []
+        self.searchroute = []
+        '''
+        startway
+        0 = nearest
+        1 = farthest
+        2 = smallest
+        3 = largest
+        '''
+        self.startway = startway
         pass
 
 
@@ -313,6 +323,45 @@ class drawvoronoi():
 
         return distance_idx
 
+    def sortaraesize(self, arealist):
+        sortedarealist_idx = [0 for _ in range(len(arealist))]
+        sortedarealist = arealist[:]
+        sortedarealist.sort()
+        for i in range(len(sortedarealist)):
+            for j in range(len(arealist)):
+                if sortedarealist[i] == arealist[j]:
+                    sortedarealist_idx[i] = j
+        return sortedarealist_idx
+
+
+    def findnearestlist(self, coordlist, startidx):
+
+        distance = [[0 for _ in range(len(coordlist))] for _ in range(len(coordlist))]
+        greedyidx = [0 for _ in range(len(coordlist))]
+        for i in range(len(coordlist)):
+            for j in range(len(coordlist)):
+                distance[i][j] = self.caldistancebetweentwopoint(coordlist[i], coordlist[j])
+                if i == j :
+                    distance[i][j] = sys.maxsize
+        #print("distance\n",distance)
+
+        check = [False for _ in range(len(coordlist))]
+        check[startidx] = True
+
+        for i in range(len(coordlist)):
+            greedyidx[i] = startidx
+            temp = np.array(distance[startidx])
+            #print("temp\n",temp)
+            for j in range(len(temp)):
+                startidx = np.argmin(temp)
+                if not check[startidx]:
+                    check[startidx] = True
+                    break
+                else:
+                    temp[startidx] = sys.maxsize
+        #print(distance)
+        return distance, greedyidx
+
     def voronoialgo(self):
 
         sx = self.points[2][0]
@@ -363,6 +412,16 @@ class drawvoronoi():
         Each polygon
         '''
         nearpointslist = []
+        farpointslist = []
+        largepointslist = []
+        smallpointslist = []
+
+        nearpointslist_idx = []
+        farpointslist_idx = []
+        largepointslist_idx = []
+        smallpointslist_idx = []
+        totalpoints = []
+
         for region in regions:
 
             convextest = []
@@ -391,12 +450,12 @@ class drawvoronoi():
             keepinzone과 voronoi영역 만나는 점 추가
             '''
             in_keepinzone_points_coord = self.findtouchingpointkeepinzone(polygon, region, in_keepinzone_points_coord, in_keepinzone_points_list)
+
             '''
             keepinzone의 꼭지점 추가
             '''
             in_keepinzone_points_coord = self.insertkeepinzonevertex(in_keepinzone_points_coord, polygon_count)
             adjusted_polygon_points_coord = in_keepinzone_points_coord[:]
-
 
             '''
             Visualization
@@ -408,35 +467,65 @@ class drawvoronoi():
             for ttt in range(len(in_keepinzone_points_coord)):
                 ax2.text(in_keepinzone_points_coord[ttt][0],in_keepinzone_points_coord[ttt][1]+polygon_count*0.02,'{} point:{}'.format(polygon_count, ttt), fontsize=6)
 
-
             '''
             voronoi로 나눈 지역 delaunay로 나눔
             '''
             # recovery point 추가
-            adjusted_polygon_points_coord.insert(0,self.points[polygon_count+4].tolist())
+            adjusted_polygon_points_coord.insert(0, self.points[polygon_count+4].tolist())
             trilist = Delaunay(adjusted_polygon_points_coord)
 
             #coordlist, arealist, degreelist = self.infotriangles(adjusted_polygon_points_coord, trilist)
             coordlist, arealist = self.infotriangles(adjusted_polygon_points_coord, trilist)
 
-            print("adjust\n",adjusted_polygon_points_coord)
-            print("trilist.simplices.copy()\n",trilist.simplices)
-            print("arealist\n",arealist)
+            # print("adjust\n",adjusted_polygon_points_coord)
+            # print("trilist.simplices.copy()\n",trilist.simplices)
+            # print("arealist\n",arealist)
 
+            totalpoints.append(coordlist)
+
+
+            '''
+            NEAR POINTS
+            '''
             nearpoints_idx = self.calcdistancecenterandrecovery(coordlist, self.points[polygon_count+4])
             nearpoints = [0 for _ in range(len(coordlist))]
-
             for i in range(len(nearpoints_idx)):
                 nearpoints[i] = coordlist[nearpoints_idx[i]]
             nearpointslist.append(nearpoints)
-            print("NEAR")
-            print(np.array(coordlist))
-            print(np.array(nearpoints_idx))
-            print(np.array(nearpoints))
-            print(np.array(nearpointslist))
-            #
-            # for i in range(len(coordlist)):
-            #     convextest.append(coordlist[i])
+            nearpointslist_idx.append(nearpoints_idx)
+
+            farpoints = nearpoints[::-1]
+            farpointslist.append(farpoints)
+            farpointslist_idx.append(nearpoints_idx[::-1])
+            # print("NEAR")
+            # print(np.array(coordlist))
+            # print(np.array(nearpoints_idx))
+            # print(np.array(nearpoints))
+            '''
+            NEAR POINTS END
+            '''
+
+
+            '''
+            SIZE POINTS
+            '''
+            smallpoints_idx = self.sortaraesize(arealist)
+            smallpoints = [0 for _ in range(len(coordlist))]
+            for i in range(len(smallpoints_idx)):
+                smallpoints[i] = coordlist[smallpoints_idx[i]]
+            smallpointslist.append(smallpoints)
+            smallpointslist_idx.append(smallpoints_idx)
+
+            largepoints = smallpoints[::-1]
+            largepointslist.append(largepoints)
+            largepointslist_idx.append(smallpoints_idx[::-1])
+            '''
+            SIZE POINTS END
+            '''
+            #print(np.array(nearpointslist))
+
+            # for i in range(len(nearpoints)):
+            #     convextest.append(nearpoints[i])
             # # for i in range(len(adjusted_polygon_points_coord)):
             # #     convextest.append(adjusted_polygon_points_coord[i])
             #
@@ -468,17 +557,60 @@ class drawvoronoi():
             polygon_count += 1
             region_count = 0
 
-        nearpointslist = np.array(nearpointslist)
-        print(nearpointslist)
-        plt.show()
 
+
+        '''
+        set order of points
+        '''
+        distancelist = []
+        shortestroute = []
+
+        for i in range(len(totalpoints)):
+            #print("nearpointslist[i]\n",totalpoints[i])
+            if self.startway == 0:
+                startidx = nearpointslist_idx[i][0]
+            elif self.startway == 1:
+                startidx = farpointslist_idx[i][0]
+            elif self.startway == 2:
+                startidx = smallpointslist_idx[i][0]
+            else:
+                startidx = largepointslist_idx[i][0]
+            temp, route = self.findnearestlist(totalpoints[i], startidx)
+            #print("route\n",route)
+            distancelist.append(temp)
+            shortestroute.append(route)
+
+        '''
+        set order of points END
+        '''
+        totalpoints = np.array(totalpoints)
+        nearpointslist = np.array(nearpointslist)
+        farpointslist = np.array(farpointslist)
+        largepointslist = np.array(largepointslist)
+        smallpointslist = np.array(smallpointslist)
+
+        print("totalpoints\n",totalpoints)
+        # print("near\n", nearpointslist)
+        # print(nearpointslist_idx)
+        # print("far\n", farpointslist)
+        # print(farpointslist_idx)
+        # print("large\n", largepointslist)
+        # print(largepointslist_idx)
+        # print("small\n", smallpointslist)
+        # print(smallpointslist_idx)
+        #
+        # print("distancelist\n",np.array(distancelist))
+        print("shortestroute\n",shortestroute)
+        self.searchcoord = totalpoints
+        self.searchroute = shortestroute
+        #plt.show()
 
 
 if __name__ == '__main__':
-    nk = 4
-    nc = 5
+    nkeepinzone = 4
+    nrecoveryzone = 4
     numberofdroneeachrecoveryzone = 3
-    pointlist = [[] for _ in range((nk + nc))]
+    pointlist = [[] for _ in range((nkeepinzone + nrecoveryzone))]
 
     # # LEFT DOWN
     # pointlist[0] = [40.12915017 - 0.04, -121.4366 - 0.03]
@@ -502,13 +634,15 @@ if __name__ == '__main__':
     pointlist[5] = [39.9919, -120.8328]
     pointlist[6] = [39.5894, -121.0448]
     pointlist[7] = [39.7181, -121.254]
-    pointlist[8] = [39.8012, -121.1]
+    # pointlist[8] = [39.8012, -121.1]
     # pointlist[9] = [39.8094, -120.828]
 
     pointlist = np.array(pointlist)
 
-    voro = drawvoronoi(pointlist, nk, nc, numberofdroneeachrecoveryzone)
+    voro = drawvoronoi(pointlist, nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone, 0)
     voro.voronoialgo()
+    print("SEARCHCOORD\n",voro.searchcoord)
+    print("SEARCHROUTE\n",voro.searchroute)
     # try:
     #     voro.delaunayalgo()
     # except:
