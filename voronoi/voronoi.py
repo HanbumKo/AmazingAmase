@@ -638,7 +638,13 @@ if __name__ == '__main__':
     # pointlist[9] = [39.8094, -120.828]
 
     pointlist = np.array(pointlist)
-
+    '''
+    startway
+    0 = nearest
+    1 = farthest
+    2 = smallest
+    3 = largest
+    '''
     voro = drawvoronoi(pointlist, nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone, 0)
     voro.voronoialgo()
     print("SEARCHCOORD\n",voro.searchcoord)
