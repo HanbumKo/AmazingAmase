@@ -18,9 +18,11 @@ class TerrianService(object):
     def distanceToHorizon(self, meterAlt):
         return math.sqrt(1.2756274E7 * meterAlt + meterAlt * meterAlt)
 
-    def getLatLon(self, radLat, radLon, mDist, radAzimuth):
-        # m 잖아
-        # 700m 가와야진
+    def getLatLon(self, lat, lon, mDist, azimuth):
+        radLat = math.radians(lat)
+        radLon = math.radians(lon)
+        radAzimuth = math.radians(azimuth)
+
         radDist = mDist / 6378137.0
         coslat1 = math.cos(radLat)
         sinlat1 = math.sin(radLat)
@@ -28,8 +30,11 @@ class TerrianService(object):
         sinAz = math.sin(radAzimuth)
         sinc = math.sin(radDist)
         cosc = math.cos(radDist)
-        return [math.asin(sinlat1 * cosc + coslat1 * sinc * cosAz), math.atan2(sinc * sinAz, coslat1 * cosc - sinlat1 * sinc * cosAz) + radLon]
-    
+        radLat2 = math.asin(sinlat1 * cosc + coslat1 * sinc * cosAz)
+        sinlat2 = math.sin(radLat2)
+        radLon2 = radLon + math.atan2(sinAz * sinc * coslat1, cosc - sinlat1 * sinlat2 )
+
+        return [math.degrees(radLat2), math.degrees(radLon2)]
 
     def addDirectory(self, dir):
         # 경로 파일 읽고, 널이 아니면
@@ -167,13 +172,13 @@ class TerrianService(object):
         return elevs, coords
 
 
-    def getInterceptPoint(self, startLat, startLon, startAlt, headingRad, slopeRad, maxDist, level):
+    def getInterceptPoint(self, startLat, startLon, startAlt, heading, slopeRad, maxDist, level):
         tanSlope = math.tan(slopeRad)
         if (slopeRad >= 0.0 or maxDist <= 0.0) :
             maxDist = self.distanceToHorizon(startAlt)
 
         maxDist = math.min(maxDist, math.abs(startAlt / tanSlope))
-        ll = self.getLatLon(math.radians(startLat), math.radians(startLon), maxDist, headingRad);
+        ll = self.getLatLon(startLat, startLon, maxDist, heading);
         lat2 = math.degrees(ll[0])
         lon2 = math.degrees(ll[1])
         numsteps = int(math.hypot(lat2 - startLat, lon2 - startLon) / DTEDTile.getPostSpacing(level));

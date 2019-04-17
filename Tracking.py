@@ -1,0 +1,81 @@
+import Drone
+import Utils
+import Enum
+import math
+
+class Tracking():
+
+    def __init__(self, utils):
+        self.utils = utils
+        self.chagne = 5
+
+        pass
+    
+    def updateTrackingState(self, uavInfos):
+        # uavInfos = { 
+        #   OBJ : <uav_object>
+        #   STATE : <uav_state>
+        #   ACTION : <uav_action>
+        #   ACTION_DETIAL : ...
+        # }
+        # ACTION_DETIAL = {
+        #   tracking_direction : clockwise, unclockwise
+        #   tracking_zoneID : 0
+        #   last_tracking_time : 0,
+        #   next_azimuth : 0,
+        #   next_heading : 0,
+        #   msg : 0
+        # }
+        if self.isStillTracking(uavInfos):
+            #Still tracking
+            self.keepTracking(uavInfos)
+        else : 
+            # got lost
+            uavInfos.ACTION = Enum.ACTION_SEARCHING
+            pass
+        
+    def isStillTracking(self, uavInfos):
+        # tracking condition : interval between current time and last_tracking_time
+        last_tracking_time = uavInfos.ACTION_DETAIL.last_tracking_time
+        current_time = uavInfos.OBJ.getTime()
+
+        return (current_time - last_tracking_time)//1000 < 45
+    
+    def keepTracking(self, uavInfos):
+        msg = uavInfos.ACTION_DETAIL.msg
+
+        if msg == 1:
+            msg = -1
+        elif msg == -1 :
+            originalDirection = self.getOriginalDirection(uavInfos)
+            azimuth = uavInfos.OBJ.getAzimuth()
+            direction = uavInfos.ACTION_DETAIL.tracking_direction
+
+            uavInfos.NEXT_HEADING = originalDirection+direction*(self.__change)*(-1)
+            if azimuth > 45 or azimuth < -45 :
+                uavInfos.NEXT_AZIMUTH = azimuth + direction*(self.__change)
+
+    def getOriginalDirection(self, uavInfos):
+        heading = uavInfos.getHeading()
+        course = uavInfos.getCourse()
+        originalDirection = 0
+
+        if heading < 0 :
+            heading += 360 
+
+        if course < 0 :
+            course += 360 
+        
+        gap =  abs((heading-course)/2)
+        
+        if gap > 90 :
+            gap = 180 - gap
+        
+        if heading > course:
+            originalDirection = course + gap
+        elif heading < course :
+            originalDirection = course - gap
+        else :
+            originalDirection = course
+
+        return originalDirection

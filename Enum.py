@@ -1,0 +1,9 @@
+# drone state
+STATE_ALIVE = 0
+STATE_DEAD = 1
+
+# what it is doing now
+ACTION_WELCOME = -1
+ACTION_SEARCHING = 0
+ACTION_TRACKING = 1
+ACTION_CHARGING = 2
