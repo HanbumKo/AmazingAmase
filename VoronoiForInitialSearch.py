@@ -64,7 +64,6 @@ class VoronoiSearch():
         for (p1, p2), (v1, v2) in zip(vor.ridge_points, vor.ridge_vertices):
             all_ridges.setdefault(p1, []).append((p2, v1, v2))
             all_ridges.setdefault(p2, []).append((p1, v1, v2))
-        # print("debug...")
 
         # Reconstruct infinite regions
         for p1, region in enumerate(vor.point_region):
@@ -386,16 +385,16 @@ class VoronoiSearch():
         '''
         Visualization
         '''
-        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
+        #fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
         # print("debug...")
-        ax1.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
-        ax1.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
-        ax2.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
-        ax2.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
-        ax3.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
-        ax3.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
-        ax4.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
-        ax4.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
+        # ax1.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
+        # ax1.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
+        # ax2.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
+        # ax2.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
+        # ax3.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
+        # ax3.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
+        # ax4.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
+        # ax4.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
 
         # ax1.set_xlim([self.points[2][0], self.points[1][0]])
         # ax1.set_ylim([self.points[0][1], self.points[1][1]])
@@ -407,8 +406,12 @@ class VoronoiSearch():
         # ax4.set_ylim([self.points[0][1], self.points[1][1]])
 
 
-        ax1.triplot(self.points[:, 0], self.points[:, 1], tri.simplices.copy())
-        ax1.plot(self.points[:, 0], self.points[:, 1], 'o')
+        for i in range(len(self.points)):
+            self.points[i] = np.array(self.points[i])
+        self.points = np.array(self.points)
+
+        # ax1.triplot(self.points[:, 0], self.points[:, 1], tri.simplices.copy())
+        # ax1.plot(self.points[:, 0], self.points[:, 1], 'o')
 
         polygon_count=0
         region_count=0
@@ -425,7 +428,7 @@ class VoronoiSearch():
         largepointslist_idx = []
         smallpointslist_idx = []
         totalpoints = []
-
+        print("debug...region")
         for region in regions:
 
             convextest = []
@@ -433,7 +436,7 @@ class VoronoiSearch():
             in_keepinzone_points_list = []
 
             polygon = vertices[region]
-            ax2.fill(*zip(*polygon), alpha=0.4)
+            # ax2.fill(*zip(*polygon), alpha=0.4)
             # print("-------------")
             # print("  ",str(polygon_count),"  ")
             # print(vertices[region])
@@ -465,11 +468,11 @@ class VoronoiSearch():
             Visualization
             '''
             in_keepinzone_points_coord = np.array(in_keepinzone_points_coord)
-            ax2.plot(in_keepinzone_points_coord[:,0], in_keepinzone_points_coord[:,1], 'o')
-            ax2.plot(self.points[polygon_count+4, 0], self.points[polygon_count+4, 1],'v')
-            ax2.text(self.points[polygon_count+4, 0], self.points[polygon_count+4, 1]+0.01,'{}'.format(polygon_count), fontsize=6)
-            for ttt in range(len(in_keepinzone_points_coord)):
-                ax2.text(in_keepinzone_points_coord[ttt][0],in_keepinzone_points_coord[ttt][1]+polygon_count*0.02,'{} point:{}'.format(polygon_count, ttt), fontsize=6)
+            # ax2.plot(in_keepinzone_points_coord[:,0], in_keepinzone_points_coord[:,1], 'o')
+            # ax2.plot(self.points[polygon_count+4, 0], self.points[polygon_count+4, 1],'v')
+            # ax2.text(self.points[polygon_count+4, 0], self.points[polygon_count+4, 1]+0.01,'{}'.format(polygon_count), fontsize=6)
+            # for ttt in range(len(in_keepinzone_points_coord)):
+            #     ax2.text(in_keepinzone_points_coord[ttt][0],in_keepinzone_points_coord[ttt][1]+polygon_count*0.02,'{} point:{}'.format(polygon_count, ttt), fontsize=6)
 
             '''
             voronoi로 나눈 지역 delaunay로 나눔
@@ -551,17 +554,18 @@ class VoronoiSearch():
 
             adjusted_polygon_points_coord = np.array(adjusted_polygon_points_coord)
 
-            ax3.triplot(adjusted_polygon_points_coord[:, 0], adjusted_polygon_points_coord[:, 1],trilist.simplices.copy())
-            ax3.plot(coordlist[:, 0], coordlist[:, 1], 'o')
-
-            for ttt in range(len(trilist.simplices)):
-                ax3.text(coordlist[ttt][0],coordlist[ttt][1]+polygon_count*0.01,'{}\n{}'.format(ttt, round(arealist[ttt],3)), fontsize=6)
+            # ax3.triplot(adjusted_polygon_points_coord[:, 0], adjusted_polygon_points_coord[:, 1],trilist.simplices.copy())
+            # ax3.plot(coordlist[:, 0], coordlist[:, 1], 'o')
+            #
+            # for ttt in range(len(trilist.simplices)):
+            #     ax3.text(coordlist[ttt][0],coordlist[ttt][1]+polygon_count*0.01,'{}\n{}'.format(ttt, round(arealist[ttt],3)), fontsize=6)
 
 
             polygon_count += 1
             region_count = 0
 
 
+        print("debug...3")
 
         '''
         set order of points

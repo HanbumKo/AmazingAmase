@@ -402,7 +402,9 @@ class VoronoiSearch():
         # ax4.set_xlim([self.points[2][0], self.points[1][0]])
         # ax4.set_ylim([self.points[0][1], self.points[1][1]])
 
-
+        print(self.points)
+        print(type(self.points[0]))
+        print(type(self.points))
         ax1.triplot(self.points[:, 0], self.points[:, 1], tri.simplices.copy())
         ax1.plot(self.points[:, 0], self.points[:, 1], 'o')
 
