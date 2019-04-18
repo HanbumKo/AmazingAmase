@@ -174,28 +174,3 @@ class Utils():
 
         # Sending the Vehicle Action Command message to AMASE to be interpreted
         self.__client.sendLMCPObject(vehicle_action_command)
-
-    def polygon(self):
-        # Initialize array
-        # 헤저드 존 별로 각각 폴리곤을 형성해야하므로 현재 uav가 탐색한 hz 번호를 구한다.
-        # -----------------
-        for location in self.__previousPolygon[hz_index]:
-            self.__uav_all.append(location)
-
-
-        print("point num : ", len(self.__uav_all))
-
-        all_coords = [[coord.get_Longitude(), coord.get_Latitude()] for coord in self.__uav_all]
-        if len(all_coords) < 3:
-            return
-        hull = ConvexHull(np.asarray(all_coords, dtype=np.float32))
-
-        self.__uav_all = [self.__uav_all[i] for i in hull.vertices]
-
-        # Create polygon object
-        self.__estimatedHazardZone = Polygon()
-
-        for i in self.__uav_all:
-            self.__estimatedHazardZone.get_BoundaryPoints().append(i)
-        self.send_estimate_report(self.__estimatedHazardZone)
-        # -------------
