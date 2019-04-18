@@ -278,11 +278,3 @@ venv/lib/python3.6/site-packages/setuptools-28.8.0-py3.6.egg
 venv/lib/python3.6/site-packages/setuptools.pth
 venv/pyvenv.cfg
 *.pyc
-*.pyc
-__pycache__/Drone.cpython-36.pyc
-__pycache__/State.cpython-36.pyc
-.idea/encodings.xml
-__pycache__/Drone.cpython-36.pyc
-*.pyc
-*.pyc
-*.pyc
