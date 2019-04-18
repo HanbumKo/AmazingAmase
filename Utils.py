@@ -37,11 +37,14 @@ from afrl.cmasi.perceive.EntityPerception import EntityPerception
 from afrl.cmasi.EntityConfiguration import EntityConfiguration
 import math
 
+DTEDPATH = './dted2/'
+
 class Utils():
     def __init__(self, tcpClient):
         self.__client = tcpClient
         self.terrian_service = TerrianService()
-        pass
+        # Dted file read
+        self.terrian_service.addDirectory(DTEDPATH)
 
     # Calculate distance
     def distance(self, uav1lon, uav1lat, uav2lon, uav2lat):
@@ -52,7 +55,10 @@ class Utils():
     
     def getElevation(self, lat, lon):
         return self.terrian_service.getElevation(lat,lon)
-    
+
+    def getElevations(self, ullat, ullon, lrlat, lrlon, arcStep):
+        self.terrian_service.getElevations(ullat, ullon, lrlat, lrlon, arcStep)
+
     def getTheta(self, altitude, maxRange):
         return -(math.degrees(math.asin(altitude/maxRange))) - 5
     

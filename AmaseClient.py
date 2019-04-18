@@ -66,17 +66,17 @@ class SampleHazardDetector(IDataReceived):
         if isinstance(lmcpObject, SessionStatus):
             scenarioTime = lmcpObject.get_ScenarioTime()
 
-        if self.isStepOne and (self.scenarioTime >= 1195000 and self.scenarioTime <= 1200000):
+        if self.isStepOne and (scenarioTime >= 1195000 and scenarioTime <= 1200000):
             self.drones.estimateDetectedZone()
 
             self.isStepOne = False
             self.isStepTwo = True
-        elif self.isStepTwo and (self.scenarioTime >= 2395000 and self.scenarioTime <= 2400000):
+        elif self.isStepTwo and (scenarioTime >= 2395000 and scenarioTime <= 2400000):
             self.drones.estimateDetectedZone()
 
             self.isStepTwo = False
             self.isStepThree = True
-        elif self.isStepThree and (self.scenarioTime >= 3595000 and self.scenarioTime <= 3600000):
+        elif self.isStepThree and (scenarioTime >= 3595000 and scenarioTime <= 3600000):
             self.drones.estimateDetectedZone()
 
             self.isStepThree = False
@@ -103,7 +103,7 @@ class SampleHazardDetector(IDataReceived):
                     recoveryZone.updateRecoveryZone(lmcpObject)
                     self.recoveryList.append(recoveryZone)
                     print(" - Done")
-                print(" - - - - - - - - - - - - - - - - - - - - ")
+                print(" - - - - - - - - - - - - - - - - - - ")
             else :
                 print(" - - - - - PHASE : UPDATE - - - - - ")
                 # calculate for initialsearch
@@ -111,8 +111,11 @@ class SampleHazardDetector(IDataReceived):
                 print(" - Assign initialsearch path")
                 self.drones.assignInitialSearchPath(aKeepInZones, aRecoveryPoints, Enum.INIT_START_NEAREST)
                 print(" - Done")
+                print(" - Read Dted data")
+                self.utils.getElevations(aKeepInZones[0][0], aKeepInZones[0][1], aKeepInZones[2][0], aKeepInZones[2][1], 1 / 3600)
+                print(" - Done")
                 self.iPhase = Enum.PHASE_UPDATE
-                print(" - - - - - - - - - - - - - - - - - - - - ")
+                print(" - - - - - - - - - - - - - - - - - - - ")
         elif self.iPhase == Enum.PHASE_UPDATE:
             if isinstance(lmcpObject, AirVehicleState):
                 self.drones.updateUAV(lmcpObject)
@@ -146,7 +149,7 @@ class SampleHazardDetector(IDataReceived):
                 # send cmd to drone
                 self.utils.sendHeadingAndAltitudeCmd(lmcpObject.get_DetectingEnitiyID(), heading, altitude)
                 self.utils.sendGimbalAzimuthAndElevationCmd(lmcpObject.get_DetectingEnitiyID(), azimuth, elevation)
-                
+
             elif isinstance(lmcpObject, RemoveEntities):
                 print(" - Update removed uav state")
                 pass

@@ -75,20 +75,20 @@ class InitialSearch():
             self.updateNextHeading(uavInfos)
 
     def checkWhetherSearched(self, uavInfos):
-        current_seacrh_point_idx = uavInfos.ACTION_DETIAL.SEARCH.current_index
-        current_seacrh_point_loc = uavInfos.ACTION_DETIAL.SEARCH.total_points[current_seacrh_point_idx]
+        current_seacrh_point_idx = uavInfos['ACTION_DETIAL']['SEARCH']['current_index']
+        current_seacrh_point_loc = uavInfos['ACTION_DETIAL']['SEARCH']['total_points'][current_seacrh_point_idx]
 
-        uav_lat = uavInfos.OBJ.get_latitude()
-        uav_lon = uavInfos.OBJ.get_longitude()
+        uav_lat = uavInfos['OBJ'].get_latitude()
+        uav_lon = uavInfos['OBJ'].get_longitude()
 
         return self.utils.distance(uav_lon, uav_lat, current_seacrh_point_loc[1], current_seacrh_point_loc[0]) <= self.threshold
         
     def movetoNextPoint(self, uavInfos):
-        next_seacrh_point_idx = (uavInfos.ACTION_DETIAL.SEARCH.current_index + 1)%len(uavInfos.ACTION_DETIAL.SEARCH.total_points)
-        next_seacrh_point_loc = uavInfos.ACTION_DETIAL.SEARCH.total_points[current_seacrh_point_idx]
+        next_seacrh_point_idx = (uavInfos['ACTION_DETIAL']['SEARCH']['current_index'] + 1)%len(uavInfos['ACTION_DETIAL']['SEARCH']['total_points'])
+        next_seacrh_point_loc = uavInfos['ACTION_DETIAL']['SEARCH']['total_points'][next_seacrh_point_idx]
 
-        uav_lat = uavInfos.OBJ.get_latitude()
-        uav_lon = uavInfos.OBJ.get_longitude()
+        uav_lat = uavInfos['OBJ'].get_latitude()
+        uav_lon = uavInfos['OBJ'].get_longitude()
 
         dy = uav_lat - next_seacrh_point_loc[1]
         dx = uav_lon - next_seacrh_point_loc[0]
@@ -98,17 +98,17 @@ class InitialSearch():
         print("next heading will be ", heading)
 
         # need to fix the direction
-        uavInfos.NEXT_HEADING = heading
-        uavInfos.NEXT_AZIMUTH = {'start': -45, 'end': 45, 'rate': 45}
+        uavInfos['NEXT_HEADING'] = heading
+        uavInfos['NEXT_AZIMUTH'] = {'start': -45, 'end': 45, 'rate': 45}
 
-        uavInfos.ACTION_DETIAL.SEARCH.current_index = next_seacrh_point_idx 
+        uavInfos['ACTION_DETIAL']['SEARCH']['current_index'] = next_seacrh_point_idx 
 
     def updateNextHeading(self, uavInfos):
-        current_seacrh_point_idx = uavInfos.ACTION_DETIAL.SEARCH.current_index
-        current_seacrh_point_loc = uavInfos.ACTION_DETIAL.SEARCH.total_points[current_seacrh_point_idx]
+        current_seacrh_point_idx = uavInfos['ACTION_DETIAL']['SEARCH']['current_index']
+        current_seacrh_point_loc = uavInfos['ACTION_DETIAL']['SEARCH']['total_points'][current_seacrh_point_idx]
 
-        uav_lat = uavInfos.OBJ.get_latitude()
-        uav_lon = uavInfos.OBJ.get_longitude()
+        uav_lat = uavInfos['OBJ'].get_latitude()
+        uav_lon = uavInfos['OBJ'].get_longitude()
 
         dy = uav_lat - current_seacrh_point_loc[1]
         dx = uav_lon - current_seacrh_point_loc[0]
@@ -118,7 +118,7 @@ class InitialSearch():
         print("next heading will be ", heading)
 
         # need to fix the direction
-        uavInfos.NEXT_HEADING = heading
-        uavInfos.NEXT_AZIMUTH = {'start': -45, 'end': 45, 'rate': 45}
+        uavInfos['NEXT_HEADING'] = heading
+        uavInfos['NEXT_AZIMUTH'] = {'start': -45, 'end': 45, 'rate': 45}
 
 
