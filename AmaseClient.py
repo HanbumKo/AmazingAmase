@@ -55,11 +55,32 @@ class SampleHazardDetector(IDataReceived):
         self.recoveryList = []
         self.iPhase = Enum.PHASE_SETTING
 
+        # related estimate zone
+        self.isStepOne = True
+        self.isStepTwo = False
+        self.isStepThree = False
+    
     def dataReceived(self, lmcpObject):
         scenarioTime = 0
 
         if isinstance(lmcpObject, SessionStatus):
             scenarioTime = lmcpObject.get_ScenarioTime()
+
+        if self.isStepOne and (self.scenarioTime >= 1195000 and self.scenarioTime <= 1200000):
+            self.drones.estimateDetectedZone()
+
+            self.isStepOne = False
+            self.isStepTwo = True
+        elif self.isStepTwo and (self.scenarioTime >= 2395000 and self.scenarioTime <= 2400000):
+            self.drones.estimateDetectedZone()
+
+            self.isStepTwo = False
+            self.isStepThree = True
+        elif self.isStepThree and (self.scenarioTime >= 3595000 and self.scenarioTime <= 3600000):
+            self.drones.estimateDetectedZone()
+
+            self.isStepThree = False
+
 
         if self.iPhase == Enum.PHASE_SETTING :
             if int(scenarioTime) == 0:
@@ -70,7 +91,7 @@ class SampleHazardDetector(IDataReceived):
                     print(" - Done")
                 elif isinstance(lmcpObject, AirVehicleState):
                     print(" - Get drone info")
-                    pass
+                    self.drones.updateUAV(lmcpObject)
                     print(" - Done")
                 elif isinstance(lmcpObject, KeepInZone):
                     print(" - Get keepinzone info")
@@ -111,7 +132,7 @@ class SampleHazardDetector(IDataReceived):
                     self.utils.sendGimbalAzimuthAndElevationCmd(lmcpObject.get_ID(), azimuth, elevation)
 
             elif isinstance(lmcpObject, AirVehicleConfiguration):
-                print(" - Add new drone")
+                print(" - Add new drone during playing")
                 self.drones.addNewUAV(lmcpObject)
                 print(" - Done")
 
@@ -125,7 +146,11 @@ class SampleHazardDetector(IDataReceived):
                 # send cmd to drone
                 self.utils.sendHeadingAndAltitudeCmd(lmcpObject.get_DetectingEnitiyID(), heading, altitude)
                 self.utils.sendGimbalAzimuthAndElevationCmd(lmcpObject.get_DetectingEnitiyID(), azimuth, elevation)
-
+                
+            elif isinstance(lmcpObject, RemoveEntities):
+                print(" - Update removed uav state")
+                pass
+                print(" - Done")
     def getListForInitialSearch(self):
         aKeepInZones = []
         aRecoveryPoints = []

@@ -6,7 +6,6 @@ from afrl.cmasi.GimbalAngleAction import GimbalAngleAction
 from afrl.cmasi.GimbalScanAction import GimbalScanAction
 from afrl.cmasi.Rectangle import Rectangle
 from afrl.cmasi.Circle import Circle
-from afrl.cmasi.Polygon import Polygon
 from afrl.cmasi.Waypoint import Waypoint
 from afrl.cmasi.VehicleActionCommand import VehicleActionCommand
 from afrl.cmasi.LoiterAction import LoiterAction
@@ -130,7 +129,8 @@ class State():
         newDroneDict['ACTION'] = Enum.ACTION_WELCOME
         newDroneDict['ACTION_DETAIL'] = {
             'WELCOME' : {
-                
+                'start_recovery_id' : 0,
+                'recovery_point' : [0,0]
             },
             'SEARCH' : {
                 'search_way' : 0,
@@ -202,13 +202,14 @@ class State():
         print("UAV ", AirVehicleConfiguration.get_ID(), " is added to uavList")
 
     def assignInitialSearchPath(self, aKeepInZones, aRecoveryPoints, iStartWay):
+        print(" - Set closestrecoverypoint to each uav")
+        self.setClosestRecoveryPoint(aRecoveryPoints)
+        print(" - Done")
         # cal_SearchPath
         print(" - Calc initialsearch path")
         self.initialSearch = InitialSearch.InitialSearch(self.utils, self.numOfDrone, aKeepInZones, aRecoveryPoints, iStartWay)
         print(" - Done")
         # assign each drones
-        self.initialSearch.initialsearchpoints.searchcoord
-        self.initialSearch.initialsearchpoints.searchroute
         
     def updateUavAction(self, tcpClient, uavId):
         action = self.uavList[uavId].ACTION
@@ -224,7 +225,7 @@ class State():
         elif action == Enum.ACTION_TRACKING:
             # tracking a fire-zone
             # still is tracking
-            tracking.updateTrackingState(self.uavList(uavId))
+            tracking.updateTrackingState(self.uavList[uavId])
         elif action == Enum.ACTION_CHARGING:
             # going to recovery-zone
             # still is charging
@@ -333,6 +334,27 @@ class State():
             return False
         zonePoints.append(detectedPoint)
         return True
+    
+    def estimateDetectedZone(self):
+        self.detectedZones.sendEstimateCmd()
+
+    def setClosestRecoveryPoint(self, aRecoveryPoints):
+        dist = -1
+
+        for uavInfos in self.uavList.values():
+            pointId = -1
+
+            for i in range(len(aRecoveryPoints)):
+                point = aRecoveryPoints[i]
+                
+                new_dist = self.utils.distance(point[1], point[0], uavInfos.OBJ.getLongitude(), uavInfos.OBJ.getLatitude())
+
+                if new_dist < dist:
+                    dist = new_dist
+                    pointId = i
+
+            uavInfos.ACTION_DETAIL.start_recovery_id = pointId
+            uavInfos.ACTION_DETAIL.recovery_point = aRecoveryPoints[pointId]
 
     def setNewDroneAction(self, uavId):
         # made right before after initial searching 
@@ -367,4 +389,4 @@ class State():
         lat2 = self.uavList[uavId2].OBJ.get_Latitude()
         lon2 = self.uavList[uavId2].OBJ.get_Longitude()
 
-        return self.utils.distance(lon1, lat2, lon2, lat2)
+        return self.utils.distance(lon1, lat1, lon2, lat2)
