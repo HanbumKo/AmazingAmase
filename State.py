@@ -207,7 +207,7 @@ class State():
         print(" - Done")
         # cal_SearchPath
         print(" - Calc initialsearch path")
-        self.initialSearch = InitialSearch.InitialSearch(utils, self.numOfDrone, aKeepInZones, aRecoveryPoints, iStartWay)
+        self.initialSearch = InitialSearch.InitialSearch(self.utils, self.numOfDrone, aKeepInZones, aRecoveryPoints, iStartWay)
         print(" - Done")
         # assign each drones
         
