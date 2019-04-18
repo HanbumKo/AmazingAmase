@@ -50,6 +50,7 @@ class VoronoiSearch():
 
         if vor.points.shape[1] != 2:
             raise ValueError("Requires 2D input")
+        # print("debug...")
 
         new_regions = []
         new_vertices = vor.vertices.tolist()
@@ -63,6 +64,7 @@ class VoronoiSearch():
         for (p1, p2), (v1, v2) in zip(vor.ridge_points, vor.ridge_vertices):
             all_ridges.setdefault(p1, []).append((p2, v1, v2))
             all_ridges.setdefault(p2, []).append((p1, v1, v2))
+        # print("debug...")
 
         # Reconstruct infinite regions
         for p1, region in enumerate(vor.point_region):
@@ -377,13 +379,15 @@ class VoronoiSearch():
         #             range(len(find_touchingpoint_keepinzone_list))]
         tri = Delaunay(self.points)
         vor = Voronoi(self.points[4:])
+        # print("debug...")
+
         regions, vertices = self.voronoi_finite_polygons_2d(vor)
 
         '''
         Visualization
         '''
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
-
+        # print("debug...")
         ax1.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
         ax1.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
         ax2.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])

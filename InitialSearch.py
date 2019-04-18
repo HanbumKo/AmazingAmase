@@ -22,8 +22,8 @@ class InitialSearch():
         for i in range(nkeepinzone):
             pointlist[i] = keepinzone[i]
         for i in range(nrecoveryzone):
-            pointlist[i+nkeepinzone+1] = recoveryzone[i]
-
+            pointlist[i+nkeepinzone] = recoveryzone[i]
+        print("DeBug...")
         '''
         startway
         0 = nearest
@@ -32,6 +32,7 @@ class InitialSearch():
         3 = largest
         '''
         self.initialsearchpoints = VoronoiForInitialSearch.VoronoiSearch(pointlist, nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone, startway)
+        print("DeBug...")
         self.initialsearchpoints.voronoialgo()
         print("SEARCHCOORD\n", self.initialsearchpoints.searchcoord)
         print("SEARCHROUTE\n", self.initialsearchpoints.searchroute)

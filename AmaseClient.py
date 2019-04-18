@@ -97,6 +97,11 @@ class SampleHazardDetector(IDataReceived):
                     print(" - Get keepinzone info")
                     self.keepInZone.updateKeepInZone(lmcpObject)
                     print(" - Done")
+                    print(" - Read Dted data")
+                    aKeepInZones = self.keepInZone.getPoints()
+                    self.utils.getElevations(aKeepInZones[0][0], aKeepInZones[0][1], aKeepInZones[2][0], aKeepInZones[2][1], 1 / 3600)
+                    print(" - Done")
+
                 elif isinstance(lmcpObject, RecoveryPoint):
                     print(" - Get recoverypoint info")
                     recoveryZone = RecoveryZoneInfo.RecoveryZoneInfo()
@@ -110,9 +115,6 @@ class SampleHazardDetector(IDataReceived):
                 aKeepInZones, aRecoveryPoints = self.getListForInitialSearch()
                 print(" - Assign initialsearch path")
                 self.drones.assignInitialSearchPath(aKeepInZones, aRecoveryPoints, Enum.INIT_START_NEAREST)
-                print(" - Done")
-                print(" - Read Dted data")
-                self.utils.getElevations(aKeepInZones[0][0], aKeepInZones[0][1], aKeepInZones[2][0], aKeepInZones[2][1], 1 / 3600)
                 print(" - Done")
                 self.iPhase = Enum.PHASE_UPDATE
                 print(" - - - - - - - - - - - - - - - - - - - ")
