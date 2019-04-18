@@ -281,3 +281,5 @@ venv/pyvenv.cfg
 __pycache__/Drone.cpython-36.pyc
 __pycache__/State.cpython-36.pyc
 .idea/encodings.xml
+__pycache__/Drone.cpython-36.pyc
+*.pyc
