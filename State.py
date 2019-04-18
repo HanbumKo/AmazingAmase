@@ -223,11 +223,11 @@ class State():
         elif action == Enum.ACTION_SEARCHING:
             # search for fire-zone and entity
             # update action_detail.
-            initialSearch.updateSearchingPoint(self.uavList[uavId])
+            self.initialSearch.updateSearchingPoint(self.uavList[uavId])
         elif action == Enum.ACTION_TRACKING:
             # tracking a fire-zone
             # still is tracking
-            tracking.updateTrackingState(self.uavList[uavId])
+            self.tracking.updateTrackingState(self.uavList[uavId])
         elif action == Enum.ACTION_CHARGING:
             # going to recovery-zone
             # still is charging
