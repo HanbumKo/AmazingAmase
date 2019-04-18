@@ -210,6 +210,8 @@ class State():
         self.initialSearch = InitialSearch.InitialSearch(self.utils, self.numOfDrone, aKeepInZones, aRecoveryPoints, iStartWay)
         print(" - Done")
         # assign each drones
+        # Get coordinate matrix to assign each drone to destination points
+        self.initialSearch.waypointlists
         
     def updateUavAction(self, tcpClient, uavId):
         action = self.uavList[uavId].ACTION
