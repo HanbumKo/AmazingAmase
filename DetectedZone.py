@@ -9,13 +9,13 @@ class DetectedZone():
         self.zones = {}
         self.utils = utils
 
-    def isAlreadyDetectedZone():
+    def isAlreadyDetectedZone(self, detectedPoint):
         pass
-
     def addNewDetectedZone(self, detectedPoint):
         zoneId = len(self.zones)
         self.zones[zoneId] = []
         self.zones[zoneId].append(detectedPoint)
+        return zoneId
 
     def getDetectedZoneById(self, zoneId):
         if zoneId in self.zones.keys():

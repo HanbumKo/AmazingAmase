@@ -49,108 +49,91 @@ class SampleHazardDetector(IDataReceived):
 
     def __init__(self, tcpClient):
         self.__client = tcpClient
-        self.__uavsLoiter = {}
-        self.__estimatedHazardZone = Polygon()
         self.utils = Utils.Utils(tcpClient)
         self.drones = State.State(self.utils)
         self.keepInZone = KeepInZoneInfo.KeepInZoneInfo()
         self.recoveryList = []
-        self.uavInfo
+        self.iPhase = Enum.PHASE_SETTING
 
     def dataReceived(self, lmcpObject):
-        if isinstance(lmcpObject, AirVehicleState):
-            self.drones.updateUAV(lmcpObject)
+        scenarioTime = 0
 
-            # make a command for drones, heading, azimuth update
-            self.drones.updateUavAction(lmcpObject.get_ID())
+        if isinstance(lmcpObject, SessionStatus):
+            scenarioTime = lmcpObject.get_ScenarioTime()
 
-            # find nice altitude
-            heading, azimuth, elevation, altitude = self.drones.getUpdateInfos(lmcpObject.get_ID())
-            
-            # wind affect
-            self.drones.moveFirezoneByWind(lmcpObject.getID())
-
-            # send cmd to drone
-            self.utils.sendHeadingAndAltitudeCmd(lmcpObject.get_ID(), heading, altitude)
-
-            if type(azimuth) == dict:
-                self.utils.sendGimbalAzimuthAndElevationScanCmd(
-                    lmcpObject.get_ID(), azimuth.start, azimuth.end, azimuth.rate,
-                    elevation, elevation, 0, 0)
+        if self.iPhase == Enum.PHASE_SETTING :
+            if int(scenarioTime) == 0:
+                print(" - - - - - PHASE : SETTING - - - - - ")
+                if isinstance(lmcpObject, AirVehicleConfiguration):
+                    print(" - Add new drone")
+                    self.drones.addNewUAV(lmcpObject)
+                    print(" - Done")
+                elif isinstance(lmcpObject, AirVehicleState):
+                    print(" - Get drone info")
+                    pass
+                    print(" - Done")
+                elif isinstance(lmcpObject, KeepInZone):
+                    print(" - Get keepinzone info")
+                    self.keepInZone.updateKeepInZone(lmcpObject)
+                    print(" - Done")
+                elif isinstance(lmcpObject, RecoveryPoint):
+                    print(" - Get recoverypoint info")
+                    recoveryZone = RecoveryZoneInfo.RecoveryZoneInfo()
+                    recoveryZone.updateRecoveryZone(lmcpObject)
+                    self.recoveryList.append(recoveryZone)
+                    print(" - Done")
+                print(" - - - - - - - - - - - - - - - - - - - - ")
             else :
-                self.utils.sendGimbalAzimuthAndElevationCmd(lmcpObject.get_ID(), azimuth, elevation)
+                print(" - - - - - PHASE : UPDATE - - - - - ")
+                # calculate for initialsearch
+                aKeepInZones, aRecoveryPoints = self.getListForInitialSearch()
+                print(" - Assign initialsearch path")
+                self.drones.assignInitialSearchPath(aKeepInZones, aRecoveryPoints, Enum.INIT_START_NEAREST)
+                print(" - Done")
+                self.iPhase = Enum.PHASE_UPDATE
+                print(" - - - - - - - - - - - - - - - - - - - - ")
+        elif self.iPhase == Enum.PHASE_UPDATE:
+            if isinstance(lmcpObject, AirVehicleState):
+                self.drones.updateUAV(lmcpObject)
+                # make a command for drones, heading, azimuth update
+                self.drones.updateUavAction(lmcpObject.get_ID())
+                # find nice altitude
+                heading, azimuth, elevation, altitude = self.drones.getUpdateInfos(lmcpObject.get_ID())
+                # wind affect
+                self.drones.moveFirezoneByWind(lmcpObject.getID())
+                # send cmd to drone
+                self.utils.sendHeadingAndAltitudeCmd(lmcpObject.get_ID(), heading, altitude)
+                if type(azimuth) == dict:
+                    self.utils.sendGimbalAzimuthAndElevationScanCmd(
+                        lmcpObject.get_ID(), azimuth.start, azimuth.end, azimuth.rate,
+                        elevation, elevation, 0, 0)
+                else :
+                    self.utils.sendGimbalAzimuthAndElevationCmd(lmcpObject.get_ID(), azimuth, elevation)
 
-        elif isinstance(lmcpObject, AirVehicleConfiguration):
-            self.drones.addNewUAV(lmcpObject)
+            elif isinstance(lmcpObject, AirVehicleConfiguration):
+                print(" - Add new drone")
+                self.drones.addNewUAV(lmcpObject)
+                print(" - Done")
 
-        elif isinstance(lmcpObject, KeepInZone):
-            self.keepInZone.updateKeepInZone(lmcpObject)
+            elif isinstance(lmcpObject, HazardZoneDetection):
+                # detection !!! 
+                self.drones.hazardzoneDetected(lmcpObject, scenarioTime)
 
-        elif isinstance(lmcpObject, HazardZoneDetection):
-            # detection !!! 
-            hazardDetected = lmcpObject
-            #Get location where zone first detected
-            detectedLocation = hazardDetected.get_DetectedLocation()
-            #Get entity that detected the zone
-            detectingEntity = hazardDetected.get_DetectingEnitiyID()
-            #Check if the UAV has already been sent the loiter command and proceed if it hasn't
-            if not detectingEntity in self.__uavsLoiter:
-                #Send the loiter command
-                self.sendLoiterCommand(detectingEntity, detectedLocation)
+                # find nice altitude
+                heading, azimuth, elevation, altitude = self.drones.getUpdateInfos(lmcpObject.get_DetectingEnitiyID())
 
-                #Note: Polygon points must be in clockwise or counter-clockwise order to get a shape without intersections
-                self.__estimatedHazardZone.get_BoundaryPoints().append(detectedLocation)
+                # send cmd to drone
+                self.utils.sendHeadingAndAltitudeCmd(lmcpObject.get_DetectingEnitiyID(), heading, altitude)
+                self.utils.sendGimbalAzimuthAndElevationCmd(lmcpObject.get_DetectingEnitiyID(), azimuth, elevation)
 
-                #Send out the estimation report to draw the polygon
-                self.sendEstimateReport()
+    def getListForInitialSearch(self):
+        aKeepInZones = []
+        aRecoveryPoints = []
 
-                self.__uavsLoiter[detectingEntity] = True
-                print('UAV' + str(detectingEntity) + ' detected hazard at ' + str(detectedLocation.get_Latitude()) + ',' + str(detectedLocation.get_Longitude()) + '. Sending loiter command.');
+        aKeepInZones = self.keepInZone.getPoints()
+        aRecoveryPoints = [[point.getLatitude(), point.getLongitude()] for point in self.recoveryList]
 
-        elif isinstance(lmcpObject, RecoveryPoint):
-            recoveryZone = RecoveryZoneInfo.RecoveryZoneInfo()
-            recoveryZone.updateRecoveryZone(lmcpObject)
-            self.recoveryList.append(recoveryZone)
-
-    def sendLoiterCommand(self, vehicleId, location):
-        #Setting up the mission to send to the UAV
-        vehicleActionCommand = VehicleActionCommand()
-        vehicleActionCommand.set_VehicleID(vehicleId)
-        vehicleActionCommand.set_Status(CommandStatusType.Pending)
-        vehicleActionCommand.set_CommandID(1)
-
-        #Setting up the loiter action
-        loiterAction = LoiterAction()
-        loiterAction.set_LoiterType(LoiterType.Circular)
-        loiterAction.set_Radius(250)
-        loiterAction.set_Axis(0)
-        loiterAction.set_Length(0)
-        loiterAction.set_Direction(LoiterDirection.Clockwise)
-        loiterAction.set_Duration(100000)
-        loiterAction.set_Airspeed(15)
-
-        #Creating a 3D location object for the stare point
-        loiterAction.set_Location(location)
-
-        #Adding the loiter action to the vehicle action list
-        vehicleActionCommand.get_VehicleActionList().append(loiterAction)
-
-        #Sending the Vehicle Action Command message to AMASE to be interpreted
-        self.__client.sendLMCPObject(vehicleActionCommand)
-
-    def sendEstimateReport(self):
-        #Setting up the mission to send to the UAV
-        hazardZoneEstimateReport = HazardZoneEstimateReport()
-        hazardZoneEstimateReport.set_EstimatedZoneShape(self.__estimatedHazardZone)
-        hazardZoneEstimateReport.set_UniqueTrackingID(1)
-        hazardZoneEstimateReport.set_EstimatedGrowthRate(0)
-        hazardZoneEstimateReport.set_PerceivedZoneType(HazardType.Fire)
-        hazardZoneEstimateReport.set_EstimatedZoneDirection(0)
-        hazardZoneEstimateReport.set_EstimatedZoneSpeed(0)
-
-        #Sending the Vehicle Action Command message to AMASE to be interpreted
-        self.__client.sendLMCPObject(hazardZoneEstimateReport)
-
+        return aKeepInZones, aRecoveryPoints
 
 #################
 ## Main
