@@ -36,7 +36,7 @@ class InitialSearch():
         uav_lat = uavInfos.OBJ.get_latitude()
         uav_lon = uavInfos.OBJ.get_longitude()
 
-        return self.utils.distance(uav_lon, uav_lat, current_seacrh_point_loc[0], current_seacrh_point_loc[1]) <= self.threshold
+        return self.utils.distance(uav_lon, uav_lat, current_seacrh_point_loc[1], current_seacrh_point_loc[0]) <= self.threshold
         
     def movetoNextPoint(self, uavInfos):
         current_seacrh_point_idx = (uavInfos.ACTION_DETIAL.current_index + 1)%len(uavInfos.ACTION_DETIAL.total_points)
