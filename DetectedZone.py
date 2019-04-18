@@ -1,9 +1,4 @@
 from afrl.cmasi.Polygon import Polygon
-from afrl.cmasi.searchai.HazardZoneEstimateReport import HazardZoneEstimateReport
-from afrl.cmasi.searchai.HazardZone import HazardZone
-from afrl.cmasi.searchai.HazardType import HazardType
-
-
 
 import Drone
 import Utils
@@ -50,11 +45,4 @@ class DetectedZone():
             for i in self.zones[k]:
                 estimatedHazardZone.get_BoundaryPoints().append(i)
 
-            hazard_estimate_report = HazardZoneEstimateReport()
-            hazard_estimate_report.set_EstimatedZoneShape(estimatedHazardZone)
-
-            hazard_estimate_report.set_UniqueTrackingID(k)
-            hazard_estimate_report.set_EstimatedGrowthRate(0)
-            hazard_estimate_report.set_PerceivedZoneType(HazardType.Fire)
-            hazard_estimate_report.set_EstimatedZoneDirection(0)
-            hazard_estimate_report.set_EstimatedZoneSpeed(0)
+            self.utils.send_estimate_report(estimatedHazardZone, k)
