@@ -199,7 +199,7 @@ class State():
 
         self.numOfDrone = self.numOfDrone + 1
         self.uavList[AirVehicleConfiguration.get_ID()] = newDroneDict
-        print(self.uavList[AirVehicleConfiguration.get_ID()])
+
         print("UAV ", AirVehicleConfiguration.get_ID(), " is added to uavList")
 
     def assignInitialSearchPath(self, aKeepInZones, aRecoveryPoints, iStartWay):
