@@ -28,11 +28,10 @@ class Tracking():
         # }
         if self.isStillTracking(uavInfos):
             #Still tracking
-            self.keepTracking(uavInfos)
+            self.gointoZone(uavInfos)
         else : 
             # got lost
             uavInfos.ACTION = Enum.ACTION_SEARCHING
-            pass
         
     def isStillTracking(self, uavInfos):
         # tracking condition : interval between current time and last_tracking_time
@@ -41,11 +40,11 @@ class Tracking():
 
         return (current_time - last_tracking_time)//1000 < 45
     
-    def keepTracking(self, uavInfos):
+    def gointoZone(self, uavInfos):
         msg = uavInfos.ACTION_DETAIL.msg
 
         if msg == 1:
-            msg = -1
+            uavInfos.ACTION_DETAIL.msg = -1
         elif msg == -1 :
             originalDirection = self.getOriginalDirection(uavInfos)
             azimuth = uavInfos.OBJ.getAzimuth()
@@ -54,6 +53,20 @@ class Tracking():
             uavInfos.NEXT_HEADING = originalDirection+direction*(self.__change)*(-1)
             if azimuth > 45 or azimuth < -45 :
                 uavInfos.NEXT_AZIMUTH = azimuth + direction*(self.__change)
+
+    def gooutFromZone(self, uavInfos):
+        direction = uavInfos.ACTION_DETAIL.tracking_direction
+        uavInfos.ACTION_DETAIL.tracking_direction.msg = 1
+
+        originalDirection = self.getOriginalDirection(uavInfos)
+        azimuth = uavInfos.OBJ.getAzimuth()
+
+
+        uavInfos.NEXT_HEADING =  originalDirection+direction*(self.__change)
+
+        if azimuth < 90 and azimuth > -90:
+            uavInfos.NEXT_AZIMUTH = azimuth + direction*(self.__change)*(-1)
+            
 
     def getOriginalDirection(self, uavInfos):
         heading = uavInfos.getHeading()

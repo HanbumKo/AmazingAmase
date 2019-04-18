@@ -52,9 +52,9 @@ class State():
         self.uavList = {} # Dictionary
         self.numOfDrone = 0
         self.utils = utils
-        self.initialSearch = InitialSearch.InitialSearch(utils)
+        self.initialSearch = None
         self.tracking = Tracking.Tracking(utils)
-        self.detectedZones = DetectedZone.DetectedZone()
+        self.detectedZones = DetectedZone.DetectedZone(utils)
         
     def updateUAV(self, AirVehicleState):
         ID = AirVehicleState.get_ID()
@@ -124,25 +124,24 @@ class State():
         droneObject.setCameraVerticalFieldOfView(AirVehicleState.get_PayloadStateList()[2].get_VerticalFieldOfView())
         droneObject.setCameraCenterpoint(AirVehicleState.get_PayloadStateList()[2].get_Centerpoint())
 
-
     def addNewUAV(self, AirVehicleConfiguration):
         newDroneDict = {}
         newDroneDict['STATE'] = Enum.STATE_ALIVE
         newDroneDict['ACTION'] = Enum.ACTION_WELCOME
         newDroneDict['ACTION_DETAIL'] = {
+            'WELCOME' : {
+                
+            },
             'SEARCH' : {
                 'search_way' : 0,
                 'current_index' : 0,
-                'next_heading' : 0,
                 'total_points' : []
             },
             'TRACKING' : {
                 'msg' : 0,
                 'tracking_direction' : 0,
                 'tracking_zoneID' : 0,
-                'last_tracking_time' : 0,
-                'next_heading' : 0,
-                'next_azimuth' : 0
+                'last_tracking_time' : 0
             },
             'CHARGING' : {
                 'recovery_point' : 0
@@ -202,7 +201,14 @@ class State():
         self.uavList[AirVehicleConfiguration.get_ID()] = newDroneDict
         print("UAV ", AirVehicleConfiguration.get_ID(), " is added to uavList")
 
-
+    def assignInitialSearchPath(self, aKeepInZones, aRecoveryPoints, iStartWay):
+        # cal_SearchPath
+        print(" - Calc initialsearch path")
+        self.initialSearch = InitialSearch.InitialSearch(utils, self.numOfDrone, aKeepInZones, aRecoveryPoints, iStartWay)
+        print(" - Done")
+        # assign each drones
+        
+        
     def updateUavAction(self, tcpClient, uavId):
         action = self.uavList[uavId].ACTION
 
@@ -233,22 +239,23 @@ class State():
         uavInfos = self.uavList[uavId]
         uav_lat = uavInfos.OBJ.getLatitude()
         uav_lon = uavInfos.OBJ.getLongitude()
+        originalDirection = self.tracking.getOriginalDirection(uavInfos)
         paddingAlt = uavInfos.OBJ.getHazardMaxRange()*0.5
         idealDist = uavInfos.OBJ.getHazardMaxRange()*0.7
         action = uavInfos.ACTION
 
         front_Alt = 0
-        next_Alt = self.utils.getElevation(uav_lat, uav_lon) + paddingAlt
+        uavInfos.NEXT_ALTITUDE = self.utils.getElevation(uav_lat, uav_lon) + paddingAlt
 
 
         if action == Enum.ACTION_SEARCHING: #searching
             front_Alt = uavInfos.getCameraCenterpoint().get_Altitude()
         else :  # ETC.
-            coord = self.utils.getLatLon(uav_lat, uav_lon, idealDist, self.__originalDirection)
+            coord = self.utils.getLatLon(uav_lat, uav_lon, idealDist, originalDirection)
             front_Alt = self.utils.getElevation(coord[0], coord[1])
 
         # Q1. how does the gimbal angle adjust in front altitude higher than now.
-        alt_gap = uavInfos.getAltitude()- front_Alt
+        alt_gap = uavInfos.OBJ.getAltitude()- front_Alt
 
         if alt_gap <= idealDist :
             uavInfos.NEXT_ELEVATION = self.utils.getTheta(idealDist,uavInfos.OBJ.getHazardMaxRange())
@@ -271,6 +278,60 @@ class State():
                     # [lat, lon]
                     i.set_Latitude(coord[0])
                     i.set_Longitude(coord[1])
+
+    def hazardzoneDetected(self, hazardzoneDetected, detectedTime):
+        if hazardzoneDetected.get_DetectedHazardZoneType() == 1 :
+            # fire zone
+            detectedPoint = hazardzoneDetected.get_DetectedLocation()
+            entityId = hazardzoneDetected.get_DetectingEnitiyID()
+            uavInfos = self.uavList[entityId]
+            
+            if detectedTime == 0:
+                detectedTime = uavInfos.OBJ.getTime()
+            
+            if uavInfos.ACTION == Enum.ACTION_TRACKING :
+                # already tracking
+                zoneId = uavInfos.ACTION_DETAIL.tracking_zoneID
+
+                if not self.putPointIntoZones(zoneId, detectedPoint):
+                    return
+
+                self.tracking.gooutFromZone(uavInfos)
+                uavInfos.ACTION_DETAIL.last_tracking_time = detectedTime
+            
+            elif uavInfos.ACTION == Enum.ACTION_SEARCHING :
+                zoneId = self.detectedZones.isAlreadyDetectedZone()
+                if zoneId != -1 :
+                    # already detected
+                    if not self.putPointIntoZones(zoneId, detectedPoint):
+                        return
+
+                    #how ?? 
+
+                else :
+                    # new hazardzone
+                    # tracking
+                    uavInfos.ACTION = Enum.ACTION_TRACKING
+                    uavInfos.ACTION_DETAIL.tracking_zoneID = self.detectedZones.addNewDetectedZone(detectedPoint)
+                    uavInfos.ACTION_DETAIL.tracking_direction = -1 if uavInfos.OBJ.getAzimuth() > 0 else 1
+
+                    self.tracking.gooutFromZone(uavInfos)
+                    # call friends
+                    
+                    uavInfos.ACTION_DETAIL.last_tracking_time = detectedTime
+
+
+        else :
+            # smoke zone
+            pass
+
+    def putPointIntoZones(self, zoneId, detectedPoint):
+        zonePoints = self.detectedZones.getDetectedZoneById(zoneId)
+        if not zonePoints :
+            print("The zoneId is wrong")
+            return False
+        zonePoints.append(detectedPoint)
+        return True
 
     def setNewDroneAction(self, uavId):
         # made right before after initial searching 
@@ -298,6 +359,7 @@ class State():
         pass
 
     def getDist(self, uavId1, uavId2):
+
         lat1 = self.uavList[uavId1].OBJ.get_Latitude()
         lon1 = self.uavList[uavId1].OBJ.get_Longitude()
         

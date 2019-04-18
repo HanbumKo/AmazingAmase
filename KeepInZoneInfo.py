@@ -56,6 +56,21 @@ class KeepInZoneInfo():
         return self.CenterAltitude
     def getCenterAltitudeType(self):
         return self.CenterAltitudeType
+    def getPoints(self):
+        points = []
+        
+        center_lat = self.CenterLatitude
+        center_lon = self.CenterLongitude
+        width = self.Width / 100000
+        height = self.Height / 100000
+
+        left = center_lon - (width / 2)
+        right = center_lon + (width / 2)
+        top = center_lat + (height / 2)
+        bottom = center_lat - (height / 2)
+
+        points = [[top,left], [top, right], [bottom, right], [bottom, left]]
+        return points
     # ===========================================
     def setZoneID(self, newZoneID):
         self.ZoneID = newZoneID
