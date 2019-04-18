@@ -607,49 +607,49 @@ class VoronoiSearch():
 
 
 
-if __name__ == '__main__':
-    nkeepinzone = 4
-    nrecoveryzone = 4
-    numberofdroneeachrecoveryzone = 3
-    pointlist = [[] for _ in range((nkeepinzone + nrecoveryzone))]
-
-    # # LEFT DOWN
-    # pointlist[0] = [40.12915017 - 0.04, -121.4366 - 0.03]
-    # # LEFT UP
-    # pointlist[1] = [40.12915017 - 0.04, -120.6866 + 0.03]
-    # # RIGHT UP
-    # pointlist[2] = [39.5177 + 0.04, -120.6866 + 0.03]
-    # # RIHGT DOWN
-    # pointlist[3] = [39.5177 + 0.04, -121.4366 - 0.03]
-    #
-    # LEFT DOWN
-    pointlist[0] = [40.12915017, -121.4366]
-    # LEFT UP
-    pointlist[1] = [40.12915017, -120.6866]
-    # RIGHT UP
-    pointlist[2] = [39.5177, -120.6866]
-    # RIHGT DOWN
-    pointlist[3] = [39.5177, -121.4366]
-
-    pointlist[4] = [39.9258, -121.2517]
-    pointlist[5] = [39.9919, -120.8328]
-    pointlist[6] = [39.5894, -121.0448]
-    pointlist[7] = [39.7181, -121.254]
-    # pointlist[8] = [39.8012, -121.1]
-    # pointlist[9] = [39.8094, -120.828]
-
-    pointlist = np.array(pointlist)
-    '''
-    startway
-    0 = nearest
-    1 = farthest
-    2 = smallest
-    3 = largest
-    '''
-    voro = VoronoiSearch(pointlist, nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone, 0)
-    voro.voronoialgo()
-    print("SEARCHCOORD\n",voro.searchcoord)
-    print("SEARCHROUTE\n",voro.searchroute)
+# if __name__ == '__main__':
+#     nkeepinzone = 4
+#     nrecoveryzone = 4
+#     numberofdroneeachrecoveryzone = 3
+#     pointlist = [[] for _ in range((nkeepinzone + nrecoveryzone))]
+#
+#     # # LEFT DOWN
+#     # pointlist[0] = [40.12915017 - 0.04, -121.4366 - 0.03]
+#     # # LEFT UP
+#     # pointlist[1] = [40.12915017 - 0.04, -120.6866 + 0.03]
+#     # # RIGHT UP
+#     # pointlist[2] = [39.5177 + 0.04, -120.6866 + 0.03]
+#     # # RIHGT DOWN
+#     # pointlist[3] = [39.5177 + 0.04, -121.4366 - 0.03]
+#     #
+#     # LEFT DOWN
+#     pointlist[0] = [40.12915017, -121.4366]
+#     # LEFT UP
+#     pointlist[1] = [40.12915017, -120.6866]
+#     # RIGHT UP
+#     pointlist[2] = [39.5177, -120.6866]
+#     # RIHGT DOWN
+#     pointlist[3] = [39.5177, -121.4366]
+#
+#     pointlist[4] = [39.9258, -121.2517]
+#     pointlist[5] = [39.9919, -120.8328]
+#     pointlist[6] = [39.5894, -121.0448]
+#     pointlist[7] = [39.7181, -121.254]
+#     # pointlist[8] = [39.8012, -121.1]
+#     # pointlist[9] = [39.8094, -120.828]
+#
+#     pointlist = np.array(pointlist)
+#     '''
+#     startway
+#     0 = nearest
+#     1 = farthest
+#     2 = smallest
+#     3 = largest
+#     '''
+#     voro = VoronoiSearch(pointlist, nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone, 0)
+#     voro.voronoialgo()
+#     print("SEARCHCOORD\n",voro.searchcoord)
+#     print("SEARCHROUTE\n",voro.searchroute)
     # try:
     #     voro.delaunayalgo()
     # except:

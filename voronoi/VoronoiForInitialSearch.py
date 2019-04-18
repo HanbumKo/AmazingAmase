@@ -656,15 +656,11 @@ if __name__ == '__main__':
     #     print("voronoi doesn't work")
 
     waypointlist = []
-    #print(len(voro.searchcoord))
     for i in range(len(voro.searchcoord)):
         temp = []
-        #print(len(voro.searchcoord[i]))
         for j in range(len(voro.searchcoord[i])):
             t = voro.searchroute[i][j]
-            #print(t)
             temp.append(voro.searchcoord[i][t])
-            #print(temp)
         waypointlist.append(temp)
 
     print("TEST\n",np.array(waypointlist))
