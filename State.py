@@ -211,7 +211,17 @@ class State():
         print(" - Done")
         # assign each drones
         # Get coordinate matrix to assign each drone to destination points
-        self.initialSearch.waypointlists
+        print(" - Assign initialsearch path to each drone")
+        waypointlists = self.initialSearch.getWayPointLists()
+        for i in range(len(waypointlists)):
+            start_idx = 0
+            for uavInfos in self.uavList.values():
+                if uavInfos.ACTION_DETAIL.WELCOME.start_recovery_id == i :
+                    uavInfos.ACTION = Enum.ACTION_SEARCHING
+                    uavInfos.ACTION_DETAIL.SEARCH.current_index = start_idx
+                    uavInfos.ACTION_DETAIL.SEARCH.total_points = waypointlists[i]
+                    start_idx += 1
+        print(" - Done")
         
     def updateUavAction(self, tcpClient, uavId):
         action = self.uavList[uavId].ACTION
@@ -295,13 +305,13 @@ class State():
             
             if uavInfos.ACTION == Enum.ACTION_TRACKING :
                 # already tracking
-                zoneId = uavInfos.ACTION_DETAIL.tracking_zoneID
+                zoneId = uavInfos.ACTION_DETAIL.TRACKING.tracking_zoneID
 
                 if not self.putPointIntoZones(zoneId, detectedPoint):
                     return
 
                 self.tracking.gooutFromZone(uavInfos)
-                uavInfos.ACTION_DETAIL.last_tracking_time = detectedTime
+                uavInfos.ACTION_DETAIL.TRACKING.last_tracking_time = detectedTime
             
             elif uavInfos.ACTION == Enum.ACTION_SEARCHING :
                 zoneId = self.detectedZones.isAlreadyDetectedZone()
@@ -316,13 +326,13 @@ class State():
                     # new hazardzone
                     # tracking
                     uavInfos.ACTION = Enum.ACTION_TRACKING
-                    uavInfos.ACTION_DETAIL.tracking_zoneID = self.detectedZones.addNewDetectedZone(detectedPoint)
-                    uavInfos.ACTION_DETAIL.tracking_direction = -1 if uavInfos.OBJ.getAzimuth() > 0 else 1
+                    uavInfos.ACTION_DETAIL.TRACKING.tracking_zoneID = self.detectedZones.addNewDetectedZone(detectedPoint)
+                    uavInfos.ACTION_DETAIL.TRACKING.tracking_direction = -1 if uavInfos.OBJ.getAzimuth() > 0 else 1
 
                     self.tracking.gooutFromZone(uavInfos)
                     # call friends
                     
-                    uavInfos.ACTION_DETAIL.last_tracking_time = detectedTime
+                    uavInfos.ACTION_DETAIL.TRACKING.last_tracking_time = detectedTime
 
 
         else :
@@ -355,8 +365,8 @@ class State():
                     dist = new_dist
                     pointId = i
 
-            uavInfos.ACTION_DETAIL.start_recovery_id = pointId
-            uavInfos.ACTION_DETAIL.recovery_point = aRecoveryPoints[pointId]
+            uavInfos.ACTION_DETAIL.WELCOME.start_recovery_id = pointId
+            uavInfos.ACTION_DETAIL.WELCOME.recovery_point = aRecoveryPoints[pointId]
 
     def setNewDroneAction(self, uavId):
         # made right before after initial searching 

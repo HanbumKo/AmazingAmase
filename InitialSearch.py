@@ -49,6 +49,7 @@ class InitialSearch():
 
         return waypointlist
 
+    def getWayPointLists(self): return self.waypointlists
 
 
     def updateSearchingPoint(self, uavInfos):
@@ -71,8 +72,8 @@ class InitialSearch():
             self.movetoNextPoint(uavInfos)
 
     def checkWhetherSearched(self, uavInfos):
-        current_seacrh_point_idx = uavInfos.ACTION_DETIAL.current_index
-        current_seacrh_point_loc = uavInfos.ACTION_DETIAL.total_points[current_seacrh_point_idx]
+        current_seacrh_point_idx = uavInfos.ACTION_DETIAL.SEARCH.current_index
+        current_seacrh_point_loc = uavInfos.ACTION_DETIAL.SEARCH.total_points[current_seacrh_point_idx]
 
         uav_lat = uavInfos.OBJ.get_latitude()
         uav_lon = uavInfos.OBJ.get_longitude()
@@ -80,8 +81,8 @@ class InitialSearch():
         return self.utils.distance(uav_lon, uav_lat, current_seacrh_point_loc[1], current_seacrh_point_loc[0]) <= self.threshold
         
     def movetoNextPoint(self, uavInfos):
-        current_seacrh_point_idx = (uavInfos.ACTION_DETIAL.current_index + 1)%len(uavInfos.ACTION_DETIAL.total_points)
-        current_seacrh_point_loc = uavInfos.ACTION_DETIAL.total_points[current_seacrh_point_idx]
+        current_seacrh_point_idx = (uavInfos.ACTION_DETIAL.SEARCH.current_index + 1)%len(uavInfos.ACTION_DETIAL.SEARCH.total_points)
+        current_seacrh_point_loc = uavInfos.ACTION_DETIAL.SEARCH.total_points[current_seacrh_point_idx]
 
         uav_lat = uavInfos.OBJ.get_latitude()
         uav_lon = uavInfos.OBJ.get_longitude()
@@ -97,6 +98,6 @@ class InitialSearch():
         uavInfos.NEXT_HEADING = heading
         uavInfos.NEXT_AZIMUTH = {'start': -45, 'end': 45, 'rate': 45}
 
-        uavInfos.ACTION_DETIAL.current_index = current_seacrh_point_idx 
+        uavInfos.ACTION_DETIAL.SEARCH.current_index = current_seacrh_point_idx 
 
 
