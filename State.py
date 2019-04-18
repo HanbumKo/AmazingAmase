@@ -204,10 +204,11 @@ class State():
     def assignInitialSearchPath(self, aKeepInZones, aRecoveryPoints, iStartWay):
         # cal_SearchPath
         print(" - Calc initialsearch path")
-        self.initialSearch = InitialSearch.InitialSearch(utils, self.numOfDrone, aKeepInZones, aRecoveryPoints, iStartWay)
+        self.initialSearch = InitialSearch.InitialSearch(self.utils, self.numOfDrone, aKeepInZones, aRecoveryPoints, iStartWay)
         print(" - Done")
         # assign each drones
-        
+        self.initialSearch.initialsearchpoints.searchcoord
+        self.initialSearch.initialsearchpoints.searchroute
         
     def updateUavAction(self, tcpClient, uavId):
         action = self.uavList[uavId].ACTION

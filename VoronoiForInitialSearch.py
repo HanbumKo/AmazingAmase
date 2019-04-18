@@ -8,7 +8,7 @@ import sys
 from scipy.spatial import ConvexHull
 import time
 
-class drawvoronoi():
+class VoronoiSearch():
 
     def __init__(self, pointlist, number_keepinzone, number_recoveryzone, numberofdroneeachrecoveryzone, startway):
         self.points = pointlist
@@ -606,6 +606,7 @@ class drawvoronoi():
         #plt.show()
 
 
+
 if __name__ == '__main__':
     nkeepinzone = 4
     nrecoveryzone = 4
@@ -645,7 +646,7 @@ if __name__ == '__main__':
     2 = smallest
     3 = largest
     '''
-    voro = drawvoronoi(pointlist, nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone, 0)
+    voro = VoronoiSearch(pointlist, nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone, 0)
     voro.voronoialgo()
     print("SEARCHCOORD\n",voro.searchcoord)
     print("SEARCHROUTE\n",voro.searchroute)
