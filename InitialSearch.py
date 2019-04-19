@@ -7,7 +7,7 @@ class InitialSearch():
 
     def __init__(self, utils, NumberofDrones, keepinzone, recoveryzone, startway):
         self.utils = utils
-        self.threshold = 0.001
+        self.threshold = 0.003
 
         # nkeepinzone = 4
         # nrecoveryzone = 3
@@ -23,7 +23,7 @@ class InitialSearch():
             pointlist[i] = keepinzone[i]
         for i in range(nrecoveryzone):
             pointlist[i+nkeepinzone] = recoveryzone[i]
-        print("DeBug...")
+        # print("DeBug...")
         '''
         startway
         0 = nearest
@@ -32,12 +32,11 @@ class InitialSearch():
         3 = largest
         '''
         self.initialsearchpoints = VoronoiForInitialSearch.VoronoiSearch(pointlist, nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone, startway)
-        print("DeBug...")
+        # print("DeBug...")
         self.initialsearchpoints.voronoialgo()
         print("SEARCHCOORD\n", self.initialsearchpoints.searchcoord)
         print("SEARCHROUTE\n", self.initialsearchpoints.searchroute)
         self.waypointlists = self.returnwaypointlists()
-        pass
 
     def returnwaypointlists(self):
         waypointlist = []
@@ -60,9 +59,9 @@ class InitialSearch():
         #   OBJ : <uav_object>
         #   STATE : <uav_state>
         #   ACTION : <uav_action>
-        #   ACTION_DETIAL : ...
+        #   ACTION_DETAIL : ...
         # }
-        # ACTION_DETIAL = {
+        # ACTION_DETAIL = {
         #   search_way : 0, 1, 2
         #   current_index : 0
         #   next_heading : 0 ~ 360
@@ -71,30 +70,30 @@ class InitialSearch():
 
         if self.checkWhetherSearched(uavInfos):
             self.movetoNextPoint(uavInfos)
-        else :
-            # not yet 
+        else : 
             self.updateNextHeading(uavInfos)
 
     def checkWhetherSearched(self, uavInfos):
-        current_seacrh_point_idx = uavInfos['ACTION_DETIAL']['SEARCH']['current_index']
-        current_seacrh_point_loc = uavInfos['ACTION_DETIAL']['SEARCH']['total_points'][current_seacrh_point_idx]
+        current_seacrh_point_idx = uavInfos['ACTION_DETAIL']['SEARCH']['current_index']
+        current_seacrh_point_loc = uavInfos['ACTION_DETAIL']['SEARCH']['total_points'][current_seacrh_point_idx]
 
-        uav_lat = uavInfos['OBJ'].get_latitude()
-        uav_lon = uavInfos['OBJ'].get_longitude()
+        uav_lat = uavInfos['OBJ'].getLatitude()
+        uav_lon = uavInfos['OBJ'].getLongitude()
 
+        print(uavInfos['OBJ'].getID(), self.utils.distance(uav_lon, uav_lat, current_seacrh_point_loc[1], current_seacrh_point_loc[0]))
         return self.utils.distance(uav_lon, uav_lat, current_seacrh_point_loc[1], current_seacrh_point_loc[0]) <= self.threshold
         
     def movetoNextPoint(self, uavInfos):
-        next_seacrh_point_idx = (uavInfos['ACTION_DETIAL']['SEARCH']['current_index'] + 1)%len(uavInfos['ACTION_DETIAL']['SEARCH']['total_points'])
-        next_seacrh_point_loc = uavInfos['ACTION_DETIAL']['SEARCH']['total_points'][next_seacrh_point_idx]
+        next_seacrh_point_idx = (uavInfos['ACTION_DETAIL']['SEARCH']['current_index'] + 1)%len(uavInfos['ACTION_DETAIL']['SEARCH']['total_points'])
+        next_seacrh_point_loc = uavInfos['ACTION_DETAIL']['SEARCH']['total_points'][next_seacrh_point_idx]
 
-        uav_lat = uavInfos['OBJ'].get_latitude()
-        uav_lon = uavInfos['OBJ'].get_longitude()
+        uav_lat = uavInfos['OBJ'].getLatitude()
+        uav_lon = uavInfos['OBJ'].getLongitude()
 
-        dy = uav_lat - next_seacrh_point_loc[1]
-        dx = uav_lon - next_seacrh_point_loc[0]
+        dy = next_seacrh_point_loc[0] - uav_lat
+        dx = next_seacrh_point_loc[1] - uav_lon
 
-        heading = math.atan2(dy,dx)*180/math.pi
+        heading = math.degrees(math.atan2(dx,dy))
 
         print("next heading will be ", heading)
 
@@ -102,19 +101,19 @@ class InitialSearch():
         uavInfos['NEXT_HEADING'] = heading
         uavInfos['NEXT_AZIMUTH'] = {'start': -45, 'end': 45, 'rate': 45}
 
-        uavInfos['ACTION_DETIAL']['SEARCH']['current_index'] = next_seacrh_point_idx 
+        uavInfos['ACTION_DETAIL']['SEARCH']['current_index'] = next_seacrh_point_idx 
 
     def updateNextHeading(self, uavInfos):
-        current_seacrh_point_idx = uavInfos['ACTION_DETIAL']['SEARCH']['current_index']
-        current_seacrh_point_loc = uavInfos['ACTION_DETIAL']['SEARCH']['total_points'][current_seacrh_point_idx]
+        current_seacrh_point_idx = uavInfos['ACTION_DETAIL']['SEARCH']['current_index']
+        current_seacrh_point_loc = uavInfos['ACTION_DETAIL']['SEARCH']['total_points'][current_seacrh_point_idx]
 
-        uav_lat = uavInfos['OBJ'].get_latitude()
-        uav_lon = uavInfos['OBJ'].get_longitude()
+        uav_lat = uavInfos['OBJ'].getLatitude()
+        uav_lon = uavInfos['OBJ'].getLongitude()
 
-        dy = uav_lat - current_seacrh_point_loc[1]
-        dx = uav_lon - current_seacrh_point_loc[0]
+        dy = current_seacrh_point_loc[0] - uav_lat
+        dx = current_seacrh_point_loc[1] - uav_lon
 
-        heading = math.atan2(dy,dx)*180/math.pi
+        heading = math.degrees(math.atan2(dx,dy))
 
         print("next heading will be ", heading)
 

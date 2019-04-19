@@ -37,6 +37,8 @@ from afrl.cmasi.perceive.EntityPerception import EntityPerception
 from afrl.cmasi.EntityConfiguration import EntityConfiguration
 import math
 
+import Enum
+
 DTEDPATH = './dted2/'
 
 class Utils():
@@ -44,7 +46,7 @@ class Utils():
         self.__client = tcpClient
         self.terrian_service = TerrianService()
         # Dted file read
-        self.terrian_service.addDirectory(DTEDPATH)
+        #self.terrian_service.addDirectory(DTEDPATH)
 
     # Calculate distance
     def distance(self, uav1lon, uav1lat, uav2lon, uav2lat):
@@ -62,7 +64,7 @@ class Utils():
     def getTheta(self, altitude, maxRange):
         return -(math.degrees(math.asin(altitude/maxRange))) - 5
     
-    def go_way_point(self, id, Longitude, Latitude, Speed=15, ClimbRate=0):
+    def go_way_points(self, id, iStartIdx, aPoints, Speed=15, ClimbRate=0):
         mission_command = MissionCommand()
         mission_command.set_FirstWaypoint(1)
         mission_command.set_VehicleID(id)
@@ -71,22 +73,28 @@ class Utils():
 
         way_point_list = mission_command.get_WaypointList()
 
-        alti = self.terrian_service.getElevation(Latitude, Longitude)
+        idx = iStartIdx
 
-        way_point = Waypoint()
-        way_point.set_Latitude(Latitude)
-        way_point.set_Longitude(Longitude)
-        way_point.set_Speed(Speed)
-        way_point.set_Altitude(alti)
-        way_point.set_AltitudeType(AltitudeType.MSL)
-        way_point.set_Number(1)
-        way_point.set_NextWaypoint(2)
-        way_point.set_SpeedType(SpeedType.Airspeed)
-        way_point.set_ClimbRate(ClimbRate)
-        way_point.set_TurnType(TurnType.TurnShort)
-        way_point.set_ContingencyWaypointA(0)
-        way_point.set_ContingencyWaypointB(0)
-        way_point_list.append(way_point)
+        for i in range(len(aPoints)):
+            
+            alti = self.terrian_service.getElevation(aPoints[idx][0], aPoints[idx][1])
+
+            way_point = Waypoint()
+            way_point.set_Latitude(aPoints[idx][0])
+            way_point.set_Longitude(aPoints[idx][1])
+            way_point.set_Speed(Speed)
+            way_point.set_Altitude(alti)
+            way_point.set_AltitudeType(AltitudeType.MSL)
+            way_point.set_Number(i+1)
+            way_point.set_NextWaypoint(i+2)
+            way_point.set_SpeedType(SpeedType.Airspeed)
+            way_point.set_ClimbRate(ClimbRate)
+            way_point.set_TurnType(TurnType.TurnShort)
+            way_point.set_ContingencyWaypointA(0)
+            way_point.set_ContingencyWaypointB(0)
+            way_point_list.append(way_point)
+
+            idx = (idx+1)%len(aPoints)
 
         self.__client.sendLMCPObject(mission_command)
 
@@ -131,7 +139,7 @@ class Utils():
         vehicleActionCommand = VehicleActionCommand()
         vehicleActionCommand.set_VehicleID(uav_id)
         vehicleActionCommand.set_Status(CommandStatusType.Pending)
-        vehicleActionCommand.set_CommandID(1)
+        vehicleActionCommand.set_CommandID(Enum.CMD_DRONE_HEADING_ALT)
 
         flight = FlightDirectorAction()
         flight.set_Heading(heading)
@@ -144,7 +152,7 @@ class Utils():
         vehicle_action_command = VehicleActionCommand()
         vehicle_action_command.set_VehicleID(uav_id)
         vehicle_action_command.set_Status(CommandStatusType.Pending)
-        vehicle_action_command.set_CommandID(2)
+        vehicle_action_command.set_CommandID(Enum.CMD_GIMBAL_SET)
 
         # gimbalangleaction
         gimbalAngle_action = GimbalAngleAction()
@@ -156,12 +164,12 @@ class Utils():
 
         self.__client.sendLMCPObject(vehicle_action_command)
 
-    def sendGimbalAzimuthAndElevationScanCmd(self, uav_id, StartAzimuth=0, EndAzimuth=0, AzimuthSlewRate=0, StartElevation=-50, EndElevation=-50, ElevationSlewRate=0, cycles=0):
+    def sendGimbalAzimuthAndElevationScanCmd(self, uav_id, StartAzimuth=0, EndAzimuth=0, AzimuthSlewRate=0, StartElevation=-50, EndElevation=-50, ElevationSlewRate=5, cycles=0):
 
         vehicle_action_command = VehicleActionCommand()
         vehicle_action_command.set_VehicleID(uav_id)
         vehicle_action_command.set_Status(CommandStatusType.Pending)
-        vehicle_action_command.set_CommandID(2)
+        vehicle_action_command.set_CommandID(Enum.CMD_GIMBAL_SCAN)
 
         # start-end 까지 스캔하는 명령
         gimbalScan_action = GimbalScanAction()
@@ -176,6 +184,7 @@ class Utils():
         gimbalScan_action.set_ElevationSlewRate(ElevationSlewRate)  # 고도 한번 스캔 시간
 
         gimbalScan_action.set_Cycles(cycles)
+
         vehicle_action_command.get_VehicleActionList().append(gimbalScan_action)
 
         # Sending the Vehicle Action Command message to AMASE to be interpreted
