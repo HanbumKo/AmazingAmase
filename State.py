@@ -133,6 +133,7 @@ class State():
                 'recovery_point' : [0,0]
             },
             'SEARCH' : {
+                'is_scanning' : False,
                 'search_way' : 0,
                 'current_index' : 0,
                 'total_points' : []
@@ -214,17 +215,21 @@ class State():
         # Get coordinate matrix to assign each drone to destination points
         print(" - Assign initialsearch path to each drone")
         waypointlists = self.initialSearch.getWayPointLists()
+        
         for i in range(len(waypointlists)):
             start_idx = 0
-            for uavInfos in self.uavList.values():
+            for uavId,uavInfos in self.uavList.items():
                 if uavInfos['ACTION_DETAIL']['WELCOME']['start_recovery_id'] == i :
                     uavInfos['ACTION'] = Enum.ACTION_SEARCHING
                     uavInfos['ACTION_DETAIL']['SEARCH']['current_index'] = start_idx
                     uavInfos['ACTION_DETAIL']['SEARCH']['total_points'] = waypointlists[i]
-                    start_idx += 1
+                    start_idx = (start_idx+1)%len(waypointlists[i])
+
+                    self.utils.go_way_points(uavId,start_idx,uavInfos['ACTION_DETAIL']['SEARCH']['total_points'])
+                    self.initialSearch.updateNextHeading(uavInfos)
         print(" - Done")
         
-    def updateUavAction(self, tcpClient, uavId):
+    def updateUavAction(self, uavId):
         action = self.uavList[uavId]['ACTION']
 
         # state check
@@ -271,16 +276,17 @@ class State():
 
         # Q1. how does the gimbal angle adjust in front altitude higher than now.
         alt_gap = uavInfos['OBJ'].getAltitude()- front_Alt
-
+        
         if alt_gap <= idealDist :
             uavInfos['NEXT_ELEVATION'] = self.utils.getTheta(idealDist,uavInfos['OBJ'].getHazardMaxRange())
-            # print("optmial theta is ", self.__theta)
 
         elif alt_gap < uavInfos['OBJ'].getHazardMaxRange() :
             uavInfos['NEXT_ELEVATION'] = self.utils.getTheta(alt_gap, uavInfos['OBJ'].getHazardMaxRange())
+        else :
+            uavInfos['NEXT_ELEVATION'] = -70
 
     def moveFirezoneByWind(self, uavId):
-        if self.uavList.keys()[-1] == uavId :
+        if list(self.uavList.keys())[-1] == uavId :
             # zone move
             wind_speed = self.uavList[uavId]['OBJ'].getWindSpeed()
             wind_direction = self.uavList[uavId]['OBJ'].getWindDirection()
@@ -293,6 +299,10 @@ class State():
                     # [lat, lon]
                     i.set_Latitude(coord[0])
                     i.set_Longitude(coord[1])
+
+    def isScanning(self, uavId): return self.uavList[uavId]['ACTION_DETAIL']['SEARCH']['is_scanning']
+    
+    def setScanning(self, uavId, state): self.uavList[uavId]['ACTION_DETAIL']['SEARCH']['is_scanning'] = state
 
     def hazardzoneDetected(self, hazardzoneDetected, detectedTime):
         if hazardzoneDetected.get_DetectedHazardZoneType() == 1 :
@@ -326,6 +336,7 @@ class State():
                 else :
                     # new hazardzone
                     # tracking
+                    uavInfos['ACTION_DETAIL']['SEARCH']['is_scanning'] = False
                     uavInfos['ACTION'] = Enum.ACTION_TRACKING
                     uavInfos['ACTION_DETAIL']['TRACKING']['tracking_zoneID'] = self.detectedZones.addNewDetectedZone(detectedPoint)
                     uavInfos['ACTION_DETAIL']['TRACKING']['tracking_direction'] = -1 if uavInfos['OBJ'].getAzimuth() > 0 else 1
@@ -352,10 +363,10 @@ class State():
         self.detectedZones.sendEstimateCmd()
 
     def setClosestRecoveryPoint(self, aRecoveryPoints):
-        dist = -1
 
         for uavInfos in self.uavList.values():
             pointId = -1
+            dist = sys.maxsize
 
             for i in range(len(aRecoveryPoints)):
                 point = aRecoveryPoints[i]
