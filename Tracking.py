@@ -31,7 +31,7 @@ class Tracking():
             self.gointoZone(uavInfos)
         else : 
             # got lost
-            uavInfos['ACTION'] = Enum.ACTION_SEARCHING
+            uavInfos['ACTION'] = Enum.ACTION_INITIAL_SEARCHING
         
     def isStillTracking(self, uavInfos):
         # tracking condition : interval between current time and last_tracking_time

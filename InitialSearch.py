@@ -93,10 +93,7 @@ class InitialSearch():
         uav_lat = uavInfos['OBJ'].getLatitude()
         uav_lon = uavInfos['OBJ'].getLongitude()
 
-        dy = next_seacrh_point_loc[0] - uav_lat
-        dx = next_seacrh_point_loc[1] - uav_lon
-
-        heading = math.degrees(math.atan2(dx,dy))
+        heading = self.utils.getHeadingToDest(uav_lat, uav_lon, next_seacrh_point_loc[0], next_seacrh_point_loc[1])
 
         print("next heading will be ", heading)
 
@@ -113,10 +110,7 @@ class InitialSearch():
         uav_lat = uavInfos['OBJ'].getLatitude()
         uav_lon = uavInfos['OBJ'].getLongitude()
 
-        dy = current_seacrh_point_loc[0] - uav_lat
-        dx = current_seacrh_point_loc[1] - uav_lon
-
-        heading = math.degrees(math.atan2(dx,dy))
+        heading = self.utils.getHeadingToDest(uav_lat, uav_lon, next_seacrh_point_loc[0], next_seacrh_point_loc[1])
 
         print("next heading will be ", heading)
 
