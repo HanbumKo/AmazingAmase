@@ -126,13 +126,18 @@ class SampleHazardDetector(IDataReceived):
                 # find nice altitude
                 heading, azimuth, elevation, altitude = self.drones.getUpdateInfos(lmcpObject.get_ID())
                 # wind affect
-                self.drones.moveFirezoneByWind(lmcpObject.getID())
+                self.drones.moveFirezoneByWind(lmcpObject.get_ID())
                 # send cmd to drone
                 self.utils.sendHeadingAndAltitudeCmd(lmcpObject.get_ID(), heading, altitude)
-                if type(azimuth) == dict:
-                    self.utils.sendGimbalAzimuthAndElevationScanCmd(
-                        lmcpObject.get_ID(), azimuth.start, azimuth.end, azimuth.rate,
-                        elevation, elevation, 0, 0)
+
+                if type(azimuth) == dict :
+                    if not self.drones.isScanning(lmcpObject.get_ID()) :
+                        # self.utils.sendGimbalAzimuthAndElevationScanCmd(
+                        #     lmcpObject.get_ID(), azimuth['start'], azimuth['end'], azimuth['rate'],
+                        #     elevation, elevation, 0, 0)
+                        self.utils.sendGimbalAzimuthAndElevationScanCmd(
+                            lmcpObject.get_ID(), azimuth['start'], azimuth['end'], azimuth['rate'])
+                        self.drones.setScanning(lmcpObject.get_ID(), True)
                 else :
                     self.utils.sendGimbalAzimuthAndElevationCmd(lmcpObject.get_ID(), azimuth, elevation)
 

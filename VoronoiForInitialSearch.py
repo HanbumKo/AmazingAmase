@@ -447,7 +447,7 @@ class VoronoiSearch():
         largepointslist_idx = []
         smallpointslist_idx = []
         totalpoints = []
-        print("debug...region")
+        #print("debug...region")
         for region in regions:
 
             convextest = []
