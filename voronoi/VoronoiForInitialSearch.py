@@ -214,6 +214,7 @@ class VoronoiSearch():
     keepinzone의 가까운 꼭지점을 삽입
     '''
     def insertkeepinzonevertex(self, in_keepinzone_points_coord, polygon_count):
+        print("in_keepinzone_points_coord, polygon_count\n",in_keepinzone_points_coord, polygon_count)
         #print("insertkeepinzonevertex\n",type(in_keepinzone_points_coord))
         min_d = [0, 0, 0, 0]
         dis = [[0 for _ in range(self.number_recoveryzone)] for _ in range(self.number_keepinzone)]
@@ -221,11 +222,15 @@ class VoronoiSearch():
             for j in range(self.number_recoveryzone):
                 dis[i][j] = self.caldistancebetweentwopoint(self.points[i],
                                                             self.points[self.number_keepinzone + j])
+
+        print(dis)
         #print("dis\n",np.array(dis))
         for i in range(self.number_keepinzone):
             min_d[i] = dis[i].index(min(dis[i]))
-        if polygon_count in min_d:
-            in_keepinzone_points_coord.append(self.points[min_d.index(polygon_count)].tolist())
+        print(min_d)
+        for i in range(len(min_d)):
+            if polygon_count == min_d[i]:
+                in_keepinzone_points_coord.append(self.points[i].tolist())
         return in_keepinzone_points_coord
 
     def caldistancebetweentwopoint(self, p1, p2):
@@ -390,8 +395,8 @@ class VoronoiSearch():
         ax2.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
         ax3.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
         ax3.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
-        ax4.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
-        ax4.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
+        ax4.set_ylim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
+        ax4.set_xlim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
 
         # ax1.set_xlim([self.points[2][0], self.points[1][0]])
         # ax1.set_ylim([self.points[0][1], self.points[1][1]])
@@ -402,9 +407,9 @@ class VoronoiSearch():
         # ax4.set_xlim([self.points[2][0], self.points[1][0]])
         # ax4.set_ylim([self.points[0][1], self.points[1][1]])
 
-        print(self.points)
-        print(type(self.points[0]))
-        print(type(self.points))
+        # print(self.points)
+        # print(type(self.points[0]))
+        # print(type(self.points))
         ax1.triplot(self.points[:, 0], self.points[:, 1], tri.simplices.copy())
         ax1.plot(self.points[:, 0], self.points[:, 1], 'o')
 
@@ -457,6 +462,7 @@ class VoronoiSearch():
             keepinzone의 꼭지점 추가
             '''
             in_keepinzone_points_coord = self.insertkeepinzonevertex(in_keepinzone_points_coord, polygon_count)
+            #print(len(in_keepinzone_points_coord))
             adjusted_polygon_points_coord = in_keepinzone_points_coord[:]
 
             '''
@@ -546,7 +552,7 @@ class VoronoiSearch():
             Visualization
             '''
             coordlist = np.array(coordlist)
-
+            #coordlist = coordlist
             adjusted_polygon_points_coord = np.array(adjusted_polygon_points_coord)
 
             ax3.triplot(adjusted_polygon_points_coord[:, 0], adjusted_polygon_points_coord[:, 1],trilist.simplices.copy())
@@ -556,6 +562,14 @@ class VoronoiSearch():
                 ax3.text(coordlist[ttt][0],coordlist[ttt][1]+polygon_count*0.01,'{}\n{}'.format(ttt, round(arealist[ttt],3)), fontsize=6)
 
 
+
+            ax4.triplot(adjusted_polygon_points_coord[:, 1], adjusted_polygon_points_coord[:, 0],
+                        trilist.simplices.copy())
+            ax4.plot(coordlist[:, 1], coordlist[:, 0], 'o')
+
+            for ttt in range(len(trilist.simplices)):
+                ax4.text(coordlist[ttt][1], coordlist[ttt][0] + polygon_count * 0.01,
+                         '{}\n{}'.format(ttt, round(arealist[ttt], 3)), fontsize=6)
             polygon_count += 1
             region_count = 0
 
@@ -610,7 +624,7 @@ class VoronoiSearch():
 
 if __name__ == '__main__':
     nkeepinzone = 4
-    nrecoveryzone = 4
+    nrecoveryzone = 3
     numberofdroneeachrecoveryzone = 3
     pointlist = [[] for _ in range((nkeepinzone + nrecoveryzone))]
 
@@ -632,12 +646,17 @@ if __name__ == '__main__':
     # RIHGT DOWN
     pointlist[3] = [39.5177, -121.4366]
 
-    pointlist[4] = [39.9258, -121.2517]
-    pointlist[5] = [39.9919, -120.8328]
-    pointlist[6] = [39.5894, -121.0448]
-    pointlist[7] = [39.7181, -121.254]
+    # pointlist[4] = [39.9258, -121.2517]
+    # pointlist[5] = [39.9919, -120.8328]
+    # pointlist[6] = [39.5894, -121.0448]
+    # pointlist[7] = [39.7181, -121.254]
     # pointlist[8] = [39.8012, -121.1]
     # pointlist[9] = [39.8094, -120.828]
+
+    pointlist[4] = [39.9062, -121.336]
+    pointlist[5] = [39.552, -121.0846]
+    pointlist[6] = [39.712, -120.7326]
+
 
     pointlist = np.array(pointlist)
     '''

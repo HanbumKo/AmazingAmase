@@ -214,19 +214,25 @@ class VoronoiSearch():
     '''
     keepinzone의 가까운 꼭지점을 삽입
     '''
+
     def insertkeepinzonevertex(self, in_keepinzone_points_coord, polygon_count):
-        #print("insertkeepinzonevertex\n",type(in_keepinzone_points_coord))
+        print("in_keepinzone_points_coord, polygon_count\n", in_keepinzone_points_coord, polygon_count)
+        # print("insertkeepinzonevertex\n",type(in_keepinzone_points_coord))
         min_d = [0, 0, 0, 0]
         dis = [[0 for _ in range(self.number_recoveryzone)] for _ in range(self.number_keepinzone)]
         for i in range(self.number_keepinzone):
             for j in range(self.number_recoveryzone):
                 dis[i][j] = self.caldistancebetweentwopoint(self.points[i],
                                                             self.points[self.number_keepinzone + j])
-        #print("dis\n",np.array(dis))
+
+        print(dis)
+        # print("dis\n",np.array(dis))
         for i in range(self.number_keepinzone):
             min_d[i] = dis[i].index(min(dis[i]))
-        if polygon_count in min_d:
-            in_keepinzone_points_coord.append(self.points[min_d.index(polygon_count)].tolist())
+        print(min_d)
+        for i in range(len(min_d)):
+            if polygon_count == min_d[i]:
+                in_keepinzone_points_coord.append(self.points[i].tolist())
         return in_keepinzone_points_coord
 
     def caldistancebetweentwopoint(self, p1, p2):
