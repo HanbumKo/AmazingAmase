@@ -1,3 +1,7 @@
+afrl/
+__pycache__/
+amase/
+lmcp/
 ./idea/*
 .DS_Store
 ./venv/*
