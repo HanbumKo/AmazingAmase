@@ -15,7 +15,8 @@ class DetectedZone():
         self.utils = utils
 
     def isAlreadyDetectedZone(self, detectedPoint):
-        pass
+        
+        return -1
     def addNewDetectedZone(self, detectedPoint):
         zoneId = len(self.zones)
         self.zones[zoneId] = []

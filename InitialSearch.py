@@ -7,7 +7,7 @@ class InitialSearch():
 
     def __init__(self, utils, NumberofDrones, keepinzone, recoveryzone, startway):
         self.utils = utils
-        self.threshold = 0.001
+        self.threshold = 0.003
 
         # nkeepinzone = 4
         # nrecoveryzone = 3
@@ -70,6 +70,8 @@ class InitialSearch():
 
         if self.checkWhetherSearched(uavInfos):
             self.movetoNextPoint(uavInfos)
+        else : 
+            self.updateNextHeading(uavInfos)
 
     def checkWhetherSearched(self, uavInfos):
         current_seacrh_point_idx = uavInfos['ACTION_DETAIL']['SEARCH']['current_index']
@@ -78,6 +80,7 @@ class InitialSearch():
         uav_lat = uavInfos['OBJ'].getLatitude()
         uav_lon = uavInfos['OBJ'].getLongitude()
 
+        print(uavInfos['OBJ'].getID(), self.utils.distance(uav_lon, uav_lat, current_seacrh_point_loc[1], current_seacrh_point_loc[0]))
         return self.utils.distance(uav_lon, uav_lat, current_seacrh_point_loc[1], current_seacrh_point_loc[0]) <= self.threshold
         
     def movetoNextPoint(self, uavInfos):

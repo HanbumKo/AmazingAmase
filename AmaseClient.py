@@ -99,7 +99,7 @@ class SampleHazardDetector(IDataReceived):
                     print(" - Done")
                     print(" - Read Dted data")
                     aKeepInZones = self.keepInZone.getPoints()
-                    self.utils.getElevations(aKeepInZones[0][0], aKeepInZones[0][1], aKeepInZones[2][0], aKeepInZones[2][1], 1 / 3600)
+                    #self.utils.getElevations(aKeepInZones[0][0], aKeepInZones[0][1], aKeepInZones[2][0], aKeepInZones[2][1], 1 / 3600)
                     print(" - Done")
 
                 elif isinstance(lmcpObject, RecoveryPoint):
@@ -121,14 +121,19 @@ class SampleHazardDetector(IDataReceived):
         elif self.iPhase == Enum.PHASE_UPDATE:
             if isinstance(lmcpObject, AirVehicleState):
                 self.drones.updateUAV(lmcpObject)
+
                 # make a command for drones, heading, azimuth update
                 self.drones.updateUavAction(lmcpObject.get_ID())
+
                 # find nice altitude
                 heading, azimuth, elevation, altitude = self.drones.getUpdateInfos(lmcpObject.get_ID())
+
                 # wind affect
                 self.drones.moveFirezoneByWind(lmcpObject.get_ID())
+
                 # send cmd to drone
                 self.utils.sendHeadingAndAltitudeCmd(lmcpObject.get_ID(), heading, altitude)
+
 
                 if type(azimuth) == dict :
                     if not self.drones.isScanning(lmcpObject.get_ID()) :
@@ -145,22 +150,23 @@ class SampleHazardDetector(IDataReceived):
                 print(" - Add new drone during playing")
                 self.drones.addNewUAV(lmcpObject)
                 print(" - Done")
-
             elif isinstance(lmcpObject, HazardZoneDetection):
                 # detection !!! 
-                self.drones.hazardzoneDetected(lmcpObject, scenarioTime)
+                if self.drones.hazardzoneDetected(lmcpObject, scenarioTime) == Enum.ZONE_FIRE:
 
-                # find nice altitude
-                heading, azimuth, elevation, altitude = self.drones.getUpdateInfos(lmcpObject.get_DetectingEnitiyID())
+                    # find nice altitude
+                    heading, azimuth, elevation, altitude = self.drones.getUpdateInfos(lmcpObject.get_DetectingEnitiyID())
 
-                # send cmd to drone
-                self.utils.sendHeadingAndAltitudeCmd(lmcpObject.get_DetectingEnitiyID(), heading, altitude)
-                self.utils.sendGimbalAzimuthAndElevationCmd(lmcpObject.get_DetectingEnitiyID(), azimuth, elevation)
-
+                    # send cmd to drone
+                    self.utils.sendHeadingAndAltitudeCmd(lmcpObject.get_DetectingEnitiyID(), heading, altitude)
+                    self.utils.sendGimbalAzimuthAndElevationCmd(lmcpObject.get_DetectingEnitiyID(), azimuth, elevation)
+                else :
+                    pass
             elif isinstance(lmcpObject, RemoveEntities):
                 print(" - Update removed uav state")
-                pass
+                self.drones.removedUavUpdate(lmcpObject.get_EntityList[0])
                 print(" - Done")
+
     def getListForInitialSearch(self):
         aKeepInZones = []
         aRecoveryPoints = []

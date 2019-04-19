@@ -46,7 +46,7 @@ class Utils():
         self.__client = tcpClient
         self.terrian_service = TerrianService()
         # Dted file read
-        self.terrian_service.addDirectory(DTEDPATH)
+        #self.terrian_service.addDirectory(DTEDPATH)
 
     # Calculate distance
     def distance(self, uav1lon, uav1lat, uav2lon, uav2lat):
