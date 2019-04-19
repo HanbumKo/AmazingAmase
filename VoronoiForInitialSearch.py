@@ -410,6 +410,25 @@ class VoronoiSearch():
             self.points[i] = np.array(self.points[i])
         self.points = np.array(self.points)
 
+        self.points[0][0] -= 0.04
+        self.points[1][0] -= 0.04
+        self.points[2][0] += 0.04
+        self.points[3][0] += 0.04
+        self.points[0][1] -= 0.03
+        self.points[1][1] += 0.03
+        self.points[2][1] += 0.03
+        self.points[3][1] -= 0.03
+
+
+        # # LEFT DOWN
+        # pointlist[0] = [40.12915017 - 0.04, -121.4366 - 0.03]
+        # # LEFT UP
+        # pointlist[1] = [40.12915017 - 0.04, -120.6866 + 0.03]
+        # # RIGHT UP
+        # pointlist[2] = [39.5177 + 0.04, -120.6866 + 0.03]
+        # # RIHGT DOWN
+        # pointlist[3] = [39.5177 + 0.04, -121.4366 - 0.03]
+
         # ax1.triplot(self.points[:, 0], self.points[:, 1], tri.simplices.copy())
         # ax1.plot(self.points[:, 0], self.points[:, 1], 'o')
 
