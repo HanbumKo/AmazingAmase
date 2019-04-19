@@ -145,7 +145,8 @@ class State():
                 'last_tracking_time' : 0
             },
             'CHARGING' : {
-                'recovery_point' : 0
+                'recovery_point' : 0,
+                'previous_action' : Enum.ACTION_WELCOME
             }
         }
         newDroneDict['NEXT_HEADING'] = 0
@@ -325,32 +326,31 @@ class State():
                 uavInfos['ACTION_DETAIL']['TRACKING']['last_tracking_time'] = detectedTime
             
             elif uavInfos['ACTION'] == Enum.ACTION_SEARCHING :
-                zoneId = self.detectedZones.isAlreadyDetectedZone()
+                zoneId = self.detectedZones.isAlreadyDetectedZone(detectedPoint)
                 if zoneId != -1 :
                     # already detected
                     if not self.putPointIntoZones(zoneId, detectedPoint):
                         return
 
                     #how ?? 
-
+                    
                 else :
                     # new hazardzone
                     # tracking
                     uavInfos['ACTION_DETAIL']['SEARCH']['is_scanning'] = False
                     uavInfos['ACTION'] = Enum.ACTION_TRACKING
                     uavInfos['ACTION_DETAIL']['TRACKING']['tracking_zoneID'] = self.detectedZones.addNewDetectedZone(detectedPoint)
-                    uavInfos['ACTION_DETAIL']['TRACKING']['tracking_direction'] = -1 if uavInfos['OBJ'].getAzimuth() > 0 else 1
+                    uavInfos['ACTION_DETAIL']['TRACKING']['tracking_direction'] = -1 if uavInfos['OBJ'].getCameraAzimuth() > 0 else 1
 
                     self.tracking.gooutFromZone(uavInfos)
                     # call friends
                     
                     uavInfos['ACTION_DETAIL']['TRACKING']['last_tracking_time'] = detectedTime
-
-
         else :
-            # smoke zone
             pass
 
+        return hazardzoneDetected.get_DetectedHazardZoneType()
+    
     def putPointIntoZones(self, zoneId, detectedPoint):
         zonePoints = self.detectedZones.getDetectedZoneById(zoneId)
         if not zonePoints :
@@ -380,6 +380,9 @@ class State():
             uavInfos['ACTION_DETAIL']['WELCOME']['start_recovery_id']= pointId
             uavInfos['ACTION_DETAIL']['WELCOME']['recovery_point'] = aRecoveryPoints[pointId]
 
+    def removedUavUpdate(self, uavId):
+        self.uavList[uavId]['STATE'] = Enum.STATE_DEAD
+
     def setNewDroneAction(self, uavId):
         # made right before after initial searching 
         deadList = [k for k,v in self.uavList.items() if v['STATE'] == Enum.STATE_DEAD ]
@@ -397,12 +400,8 @@ class State():
                     self.uavList[uavId]['ACTION'] = self.uavList[i]['ACTION']
                     self.uavList[uavId]['ACTION_DETAIL'] = self.uavList[i]['ACTION_DETAIL']
 
-        self.startSearching(uavId)
 
     def setBestPlaceToSearch(self, uavId):
-        pass
-
-    def startSearching(self, uavId):
         pass
 
     def getDist(self, uavId1, uavId2):

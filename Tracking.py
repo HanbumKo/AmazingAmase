@@ -7,7 +7,7 @@ class Tracking():
 
     def __init__(self, utils):
         self.utils = utils
-        self.chagne = 5
+        self.change = 5
 
         pass
     
@@ -47,25 +47,25 @@ class Tracking():
             uavInfos['ACTION_DETAIL']['TRACKING']['msg'] = -1
         elif msg == -1 :
             originalDirection = self.getOriginalDirection(uavInfos)
-            azimuth = uavInfos['OBJ'].getAzimuth()
+            azimuth = uavInfos['OBJ'].getCameraAzimuth()
             direction = uavInfos['ACTION_DETAIL']['TRACKING']['tracking_direction']
 
-            uavInfos['NEXT_HEADING'] = originalDirection+direction*(self.__change)*(-1)
+            uavInfos['NEXT_HEADING'] = originalDirection+direction*(self.change)*(-1)
             if azimuth > 45 or azimuth < -45 :
-                uavInfos['NEXT_AZIMUTH'] = azimuth + direction*(self.__change)
+                uavInfos['NEXT_AZIMUTH'] = azimuth + direction*(self.change)
 
     def gooutFromZone(self, uavInfos):
         direction = uavInfos['ACTION_DETAIL']['TRACKING']['tracking_direction']
         uavInfos['ACTION_DETAIL']['TRACKING']['msg'] = 1
 
         originalDirection = self.getOriginalDirection(uavInfos)
-        azimuth = uavInfos['OBJ'].getAzimuth()
+        azimuth = uavInfos['OBJ'].getCameraAzimuth()
 
 
-        uavInfos['NEXT_HEADING'] =  originalDirection+direction*(self.__change)
+        uavInfos['NEXT_HEADING'] =  originalDirection+direction*(self.change)
 
         if azimuth < 90 and azimuth > -90:
-            uavInfos['NEXT_AZIMUTH'] = azimuth + direction*(self.__change)*(-1)
+            uavInfos['NEXT_AZIMUTH'] = azimuth + direction*(self.change)*(-1)
             
 
     def getOriginalDirection(self, uavInfos):

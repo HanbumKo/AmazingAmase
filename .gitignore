@@ -7,6 +7,7 @@
 .idea/vcs.xml
 .idea/workspace.xml
 *.pyc
+.vscode/*
 venv/bin/activate
 venv/bin/activate.csh
 venv/bin/activate.fish
