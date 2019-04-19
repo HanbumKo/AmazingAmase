@@ -31,13 +31,16 @@ class InitialSearch():
         2 = smallest
         3 = largest
         '''
-        self.initialsearchpoints = VoronoiForInitialSearch.VoronoiSearch(pointlist, nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone, startway)
-        # print("DeBug...")
-        self.initialsearchpoints.voronoialgo()
-        print("SEARCHCOORD\n", self.initialsearchpoints.searchcoord)
-        print("SEARCHROUTE\n", self.initialsearchpoints.searchroute)
-        self.waypointlists = self.returnwaypointlists()
-
+        try:
+            self.initialsearchpoints = VoronoiForInitialSearch.VoronoiSearch(pointlist, nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone, startway)
+            # print("DeBug...")
+            self.initialsearchpoints.voronoialgo()
+            print("SEARCHCOORD\n", self.initialsearchpoints.searchcoord)
+            print("SEARCHROUTE\n", self.initialsearchpoints.searchroute)
+            self.waypointlists = self.returnwaypointlists()
+        except:
+            ### TODO : Implement the way to set waypoints without voronoi
+            print("CAN'T VORONOI!!")
     def returnwaypointlists(self):
         waypointlist = []
         for i in range(len(self.initialsearchpoints.searchcoord)):
