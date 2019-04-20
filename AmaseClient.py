@@ -62,7 +62,6 @@ class SampleHazardDetector(IDataReceived):
 
         # array KeepInZonePoints
         self.aKeepInZones = None
-        self.aRecoveryPoints = None
     
     def dataReceived(self, lmcpObject):
         scenarioTime = 0
@@ -103,7 +102,7 @@ class SampleHazardDetector(IDataReceived):
                     print(" - Done")
                     print(" - Read Dted data")
                     self.aKeepInZones = self.keepInZone.getPoints()
-                    #self.utils.getElevations(aKeepInZones[0][0], aKeepInZones[0][1], aKeepInZones[2][0], aKeepInZones[2][1], 1 / 3600)
+                    self.utils.getElevations(aKeepInZones[0][0], aKeepInZones[0][1], aKeepInZones[2][0], aKeepInZones[2][1], 1 / 3600)
                     print(" - Done")
 
                 elif isinstance(lmcpObject, RecoveryPoint):
@@ -128,6 +127,9 @@ class SampleHazardDetector(IDataReceived):
 
                 # check still in keepinzone
                 self.drones.checkStillInKeep(self.aKeepInZones, lmcpObject.get_ID())
+
+                # checkNeedToCharge
+                self.drones.checkNeedToCharge(lmcpObject.get_ID())
 
                 # make a command for drones, heading, azimuth update
                 self.drones.updateUavAction(lmcpObject.get_ID())
@@ -156,6 +158,8 @@ class SampleHazardDetector(IDataReceived):
             elif isinstance(lmcpObject, AirVehicleConfiguration):
                 print(" - Add new drone during playing")
                 self.drones.addNewUAV(lmcpObject)
+                self.drones.setClosestRecoveryPoint(lmcpObject.get_ID())
+                self.drones.setNewDroneAction(lmcpObject.get_ID())
                 print(" - Done")
             elif isinstance(lmcpObject, HazardZoneDetection):
                 # detection !!! 
