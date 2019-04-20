@@ -110,7 +110,7 @@ class InitialSearch():
         uav_lat = uavInfos['OBJ'].getLatitude()
         uav_lon = uavInfos['OBJ'].getLongitude()
 
-        heading = self.utils.getHeadingToDest(uav_lat, uav_lon, next_seacrh_point_loc[0], next_seacrh_point_loc[1])
+        heading = self.utils.getHeadingToDest(uav_lat, uav_lon, current_seacrh_point_loc[0], current_seacrh_point_loc[1])
 
         print("next heading will be ", heading)
 

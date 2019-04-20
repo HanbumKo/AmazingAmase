@@ -102,7 +102,7 @@ class SampleHazardDetector(IDataReceived):
                     print(" - Done")
                     print(" - Read Dted data")
                     self.aKeepInZones = self.keepInZone.getPoints()
-                    self.utils.getElevations(aKeepInZones[0][0], aKeepInZones[0][1], aKeepInZones[2][0], aKeepInZones[2][1], 1 / 3600)
+                    self.utils.getElevations(self.aKeepInZones[0][0], self.aKeepInZones[0][1], self.aKeepInZones[2][0], self.aKeepInZones[2][1], 1 / 3600)
                     print(" - Done")
 
                 elif isinstance(lmcpObject, RecoveryPoint):
