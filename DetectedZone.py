@@ -6,8 +6,8 @@ import Enum
 import math
 import sys
 
-import numpy as np
 from scipy.spatial import ConvexHull
+import numpy as np
 
 class DetectedZone():
 
