@@ -149,7 +149,8 @@ class State():
                 'last_tracking_time' : 0
             },
             'GOINGTOZONE':{
-                'tracking_zoneID' : 0
+                'tracking_zoneID' : 0,
+                'dest_position' : [0,0]
             },
             'CHARGING' : {
                 'previous_action' : Enum.ACTION_WELCOME
@@ -246,24 +247,28 @@ class State():
         print(" - Done")
     
     def checkStillInKeep(self, aKeepInZones, uavId):
-        det_lat = self.uavList[uavId]['OBJ'].getCameraCenterpoint().get_Latitude()
-        det_lon = self.uavList[uavId]['OBJ'].getCameraCenterpoint().get_Longitude()
+        uav_lat = self.uavList[uavId]['OBJ'].getLatitude()
+        uav_lon = self.uavList[uavId]['OBJ'].getLongitude()
 
         top = aKeepInZones[0][0]; bottom = aKeepInZones[2][0]
         left = aKeepInZones[0][1]; right = aKeepInZones[2][1]
 
-        if  det_lat >= top or det_lat <= bottom or det_lon >= right or det_lon <= left :
-            self.turning(self.uavList[uavId]['OBJ'].getCameraCenterpoint(), uavId)
+        if  uav_lat >= top or uav_lat <= bottom or uav_lon >= right or uav_lon <= left :
+            print("UAV -",uavId," needs to turn.")
+            self.turning([uav_lat,uav_lon], uavId)
     
     def checkNeedToCharge(self, uavId):
         uavInfos = self.uavList[uavId]
 
-        if uavInfos['ACTION'] != Enum.ACTION_TRACKING:
+        if uavInfos['ACTION'] != Enum.ACTION_TRACKING and uavInfos['ACTION'] != Enum.ACTION_CHARGING:
             fRemainFuel = uavInfos['OBJ'].getEnergyAvailable()
 
             if fRemainFuel < 50 : 
                 uavInfos['ACTION_DETAIL']['CHARGING']['previous_action'] = uavInfos['ACTION']
+                uavInfos['ACTION_DETAIL']['SEARCH']['is_scanning'] = True
                 uavInfos['ACTION'] = Enum.ACTION_CHARGING
+                print("UAV -", uavId," needs to charging")
+
                 
     def updateUavAction(self, uavId):
         action = self.uavList[uavId]['ACTION']
@@ -271,12 +276,12 @@ class State():
         # state check
         if action == Enum.ACTION_WELCOME:
             # At first time, all drones will be ACTION_WELCOME, and all drones will start initial searching 
-            pass
+            print("UAV -", uavId,"WELCOME")
         elif action == Enum.ACTION_INITIAL_SEARCHING:
             # search for fire-zone and entity
             # update action_detail.
+            
             self.initialSearch.updateSearchingPoint(self.uavList[uavId])
-
         elif action == Enum.ACTION_TRACKING:
             # tracking a fire-zone
             # still is tracking
@@ -284,20 +289,20 @@ class State():
 
         elif action == Enum.ACTION_GOINGTOZONE:
             self.updateGoing(self.uavList[uavId])
-
+            # print("UAV -",uavId,"is going to zone")
         elif action == Enum.ACTION_CHARGING:
             # going to recovery-zone
             # still is charging
             # charging
             self.checkingCharging(self.uavList[uavId])
         elif action == Enum.ACTION_ENTITY_SEARCHING:
-            pass
+            print("UAV -", uavId,"is searching entity.")
         elif action == Enum.ACTION_TURNING :
             self.checkingTurn(self.uavList[uavId])
 
     def updateGoing(self, uavInfos):
-        dest_point = self.detectedZones.getCenterPointInZone(uavInfos['ACTION_DETAIL']['tracking_zoneId'])
-
+        # dest_point = self.detectedZones.getCenterPointInZone(uavInfos['ACTION_DETAIL']['GOINGTOZONE']['tracking_zoneID'])
+        dest_point = uavInfos['ACTION_DETAIL']['GOINGTOZONE']['dest_position']
         uavInfos['NEXT_HEADING'] = self.utils.getHeadingToDest(uavInfos['OBJ'].getLatitude(), uavInfos['OBJ'].getLongitude(),
                                                                 dest_point[0], dest_point[1])
 
@@ -319,11 +324,11 @@ class State():
         uavInfos['NEXT_ALTITUDE'] = self.utils.getElevation(uav_lat, uav_lon) + paddingAlt
 
 
-        if action == Enum.ACTION_INITIAL_SEARCHING : #searching, charging, going, entity_searching
-            front_Alt = uavInfos['OBJ'].getCameraCenterpoint().get_Altitude()
-        else :  # ETC.
+        if action == Enum.ACTION_TRACKING : #searching, charging, going, entity_searching
             coord = self.utils.getLatLon(uav_lat, uav_lon, idealDist, originalDirection)
             front_Alt = self.utils.getElevation(coord[0], coord[1])
+        else :  # ETC.
+            front_Alt = uavInfos['OBJ'].getCameraCenterpoint().get_Altitude()
 
         # Q1. how does the gimbal angle adjust in front altitude higher than now.
         alt_gap = uavInfos['OBJ'].getAltitude()- front_Alt
@@ -369,7 +374,6 @@ class State():
                 # already tracking
                 zoneId = uavInfos['ACTION_DETAIL']['TRACKING']['tracking_zoneID']
                 zoneIdForCheck = self.detectedZones.isAlreadyDetectedZone(detectedPoint)
-                
                 if zoneId == zoneIdForCheck:
                     if not self.putPointIntoZones(zoneId, detectedPoint):
                         return
@@ -392,16 +396,17 @@ class State():
                         uavInfos['ACTION_DETAIL']['SEARCH']['is_scanning'] = False
                         uavInfos['ACTION'] = Enum.ACTION_TRACKING
                         uavInfos['ACTION_DETAIL']['TRACKING']['tracking_zoneID'] = zoneId
-                        uavInfos['ACTION_DETAIL']['TRACKING']['tracking_direction'] = -1 if uavInfos['OBJ'].getCameraAzimuth() > 0 else 1
+                        # uavInfos['ACTION_DETAIL']['TRACKING']['tracking_direction'] = -1 if uavInfos['OBJ'].getCameraAzimuth() > 0 else 1
                         self.tracking.gooutFromZone(uavInfos)
                         uavInfos['ACTION_DETAIL']['TRACKING']['last_tracking_time'] = detectedTime
                     else : 
                         # entity search
                         # 반대 방향으로 나가 버리기
-                        self.turning(detectedPoint, entityId)                    
+                        self.turning([detectedPoint.get_Latitude(), detectedPoint.get_Longitude()], entityId)                    
                 else :
                     # new hazardzone
                     # tracking
+                    print(" - Found New Fire Zone")
                     uavInfos['ACTION_DETAIL']['SEARCH']['is_scanning'] = False
                     uavInfos['ACTION'] = Enum.ACTION_TRACKING
                     uavInfos['ACTION_DETAIL']['TRACKING']['tracking_zoneID'] = self.detectedZones.addNewDetectedZone(detectedPoint)
@@ -409,31 +414,34 @@ class State():
                     self.tracking.gooutFromZone(uavInfos)
                     uavInfos['ACTION_DETAIL']['TRACKING']['last_tracking_time'] = detectedTime
                     # call friends
-                    self.callMyFriend(entityId)
+                    self.callMyFriend(entityId, detectedPoint)
                     
         else :
             pass
 
         return hazardzoneDetected.get_DetectedHazardZoneType()
     
-    def callMyFriend(self, uavId):
+    def callMyFriend(self, uavId, detectedPoint):
         # fastest
         uavInfos = self.uavList[uavId]
-        frinedInfos = self.findNearestFriend(uavId)
+        frinedInfos = self.findNearestFriend(uavId, detectedPoint)
 
         frinedInfos['ACTION']= Enum.ACTION_GOINGTOZONE
-        frinedInfos['ACTION_DETAIL']['GOINGTOZONE']['tracking_zoneId'] = uavInfos['ACTION_DETAIL']['TRACKING']['tracking_zoneId']
+        frinedInfos['ACTION_DETAIL']['GOINGTOZONE']['tracking_zoneID'] = uavInfos['ACTION_DETAIL']['TRACKING']['tracking_zoneID']
+        frinedInfos['ACTION_DETAIL']['GOINGTOZONE']['dest_position'] = [detectedPoint.get_Latitude(), detectedPoint.get_Longitude()]
+        frinedInfos['ACTION_DETAIL']['TRACKING']['tracking_direction'] = uavInfos['ACTION_DETAIL']['TRACKING']['tracking_direction']*(-1)
+        
+        print(" - Called Friend -",frinedInfos['OBJ'].getID(), "ACTION :", frinedInfos['ACTION'])
 
-    def findNearestFriend(self, uavId):
+    def findNearestFriend(self, uavId, oDetectedPoint):
         # 시간으로 가장 빨리올수 있는 친구 부르고
         # 그 친구는 GOINGTOZONE 상태로 바꾸고
         # tracking_zoneID를 같은 ID 로
         uavInfos = self.uavList[uavId]
-        oDetectedPoint = uavInfos['OBJ'].setHazardCenterpoint()
         
         aDists = [(iUavId, self.utils.distance(oDetectedPoint.get_Longitude(), oDetectedPoint.get_Latitude(),
                                             oUavInfos['OBJ'].getLongitude(), oUavInfos['OBJ'].getLatitude())/oUavInfos['OBJ'].getAirspeed()) 
-                                            for iUavId, oUavInfos in self.uavList.items()]
+                                            for iUavId, oUavInfos in self.uavList.items() if iUavId != uavId and oUavInfos['STATE'] == Enum.STATE_ALIVE]
 
         iNearestId = min(aDists, key = lambda i : i[1])[0] 
         return self.uavList[iNearestId]
@@ -444,12 +452,14 @@ class State():
         uav_lat = uavInfos['OBJ'].getLatitude()
         uav_lon = uavInfos['OBJ'].getLongitude()
 
-        det_lat = point.get_Latitude()
-        det_lon = point.get_Longitude()
+        det_lat = point[0]
+        det_lon = point[1]
 
         uavInfos['ACTION_DETAIL']['TURNING']['heading'] = self.utils.getHeadingToDest(det_lat, det_lon, uav_lat, uav_lon)
-        uavInfos['ACTION_DETAIL']['TURNING']['heading'] = uavInfos['ACTION']
+        uavInfos['NEXT_HEADING'] = uavInfos['ACTION_DETAIL']['TURNING']['heading'] 
+        uavInfos['ACTION_DETAIL']['TURNING']['previous_action'] = uavInfos['ACTION']
         uavInfos['ACTION'] = Enum.ACTION_TURNING
+        print("UAV -",uavId," is turning")
     
     def checkingTurn(self, uavInfos):
         threshold = 10
@@ -471,6 +481,9 @@ class State():
         
         if fDist <= threshold :
             uavInfos['ACTION'] = uavInfos['ACTION_DETAIL']['CHARGING']['previous_action']
+        else : 
+            uavInfos['NEXT_HEADING'] = self.utils.getHeadingToDest(uavInfos['OBJ'].getLatitude(), uavInfos['OBJ'].getLongitude(),
+                                uavInfos['ACTION_DETAIL']['WELCOME']['recovery_point'][0], uavInfos['ACTION_DETAIL']['WELCOME']['recovery_point'][1])
 
     def putPointIntoZones(self, zoneId, detectedPoint):
         zonePoints = self.detectedZones.getDetectedZoneById(zoneId)
@@ -481,7 +494,8 @@ class State():
         return True
     
     def numOfDroneInSameZone(self, zoneId):
-        aUavZoneList = [ 1 for uavInfos in self.uavList if uavInfos['ACTION'] & (Enum.ACTION_TRACKING|Enum.ACTION_GOINGTOZONE|Enum.ACTION_CHARGING) and
+        aUavZoneList = [ 1 for uavInfos in self.uavList.values() if uavInfos['STATE'] == Enum.STATE_ALIVE and 
+                        uavInfos['ACTION'] & (Enum.ACTION_TRACKING) and
                         uavInfos['ACTION_DETAIL']['TRACKING']['tracking_zoneID'] == zoneId]
 
         return sum(aUavZoneList)
@@ -535,8 +549,8 @@ class State():
 
             if action & Enum.ACTION_TRACKING :
                 self.uavList[uavId]['ACTION'] = Enum.ACTION_GOINGTOZONE
-                self.uavList[uavId]['ACTION_DETAIL']['GOINGTOZONE']['tracking_zoneId'] = \
-                    self.uavList[uavId]['ACTION_DETAIL']['TRACKING']['tracking_zoneId']
+                self.uavList[uavId]['ACTION_DETAIL']['GOINGTOZONE']['tracking_zoneID'] = \
+                    self.uavList[uavId]['ACTION_DETAIL']['TRACKING']['tracking_zoneID']
             
     def setBestPlaceToSearch(self, uavId):
         # 알아서 좋은 곳으로 가야해

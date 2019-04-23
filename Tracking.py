@@ -64,7 +64,7 @@ class Tracking():
 
         uavInfos['NEXT_HEADING'] =  originalDirection+direction*(self.change)
 
-        if azimuth < 90 and azimuth > -90:
+        if azimuth < 45 and azimuth > -45:
             uavInfos['NEXT_AZIMUTH'] = azimuth + direction*(self.change)*(-1)
             
 

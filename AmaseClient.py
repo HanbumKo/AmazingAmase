@@ -170,12 +170,22 @@ class SampleHazardDetector(IDataReceived):
 
                     # send cmd to drone
                     self.utils.sendHeadingAndAltitudeCmd(lmcpObject.get_DetectingEnitiyID(), heading, altitude)
-                    self.utils.sendGimbalAzimuthAndElevationCmd(lmcpObject.get_DetectingEnitiyID(), azimuth, elevation)
+
+                    if type(azimuth) == dict :
+                        if not self.drones.isScanning(lmcpObject.get_DetectingEnitiyID()) :
+                            # self.utils.sendGimbalAzimuthAndElevationScanCmd(
+                            #     lmcpObject.get_ID(), azimuth['start'], azimuth['end'], azimuth['rate'],
+                            #     elevation, elevation, 0, 0)
+                            self.utils.sendGimbalAzimuthAndElevationScanCmd(
+                                lmcpObject.get_DetectingEnitiyID(), azimuth['start'], azimuth['end'], azimuth['rate'])
+                            self.drones.setScanning(lmcpObject.get_DetectingEnitiyID(), True)
+                    else :
+                        self.utils.sendGimbalAzimuthAndElevationCmd(lmcpObject.get_DetectingEnitiyID(), azimuth, elevation)
                 else :
                     pass
             elif isinstance(lmcpObject, RemoveEntities):
                 print(" - Update removed uav state")
-                self.drones.removedUavUpdate(lmcpObject.get_EntityList[0])
+                self.drones.removedUavUpdate(lmcpObject.get_EntityList()[0])
                 print(" - Done")
 
 #################
