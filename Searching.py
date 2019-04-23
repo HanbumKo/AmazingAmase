@@ -3,7 +3,7 @@ import Utils
 import VoronoiForInitialSearch
 
 import math
-class InitialSearch():
+class Searching():
 
     def __init__(self, utils, NumberofDrones, keepinzone, recoveryzone, startway):
         self.utils = utils
@@ -55,7 +55,7 @@ class InitialSearch():
     def getWayPointLists(self): return self.waypointlists
 
 
-    def updateSearchingPoint(self, uavInfos):
+    def updateSearchingState(self, uavInfos):
         # if current drone finished searching current_point => this condition depends on the searching way.
 
         # uavInfos = { 
