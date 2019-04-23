@@ -136,36 +136,32 @@ class State():
 
     def addNewUAV(self, AirVehicleConfiguration):
         newDroneDict = {}
-        newDroneDict['STATE'] = Enum.STATE_ALIVE
-        newDroneDict['ACTION'] = Enum.INITIAL_STATE
-        newDroneDict['ACTION_DETAIL'] = {
-            'WELCOME' : {
+        newDroneDict['STATE'] = Enum.INITIAL_STATE
+        newDroneDict['STATE_DETAIL'] = {
+            Enum.INITIAL_STATE : {
                 'start_recovery_id' : 0,
                 'recovery_point' : [0,0]
             },
-            'SEARCH' : {
+            Enum.SEARCHING : {
                 'is_scanning' : False,
                 'search_way' : 0,
                 'current_index' : 0,
                 'total_points' : []
             },
-            'TRACKING' : {
+            Enum.TRACKING : {
                 'msg' : 0,
                 'tracking_direction' : 0,
                 'tracking_zoneID' : -1,
                 'last_tracking_time' : 0
             },
-            'UNDERTAKED':{
+            Enum.UNDERTAKED:{
                 'tracking_zoneID' : 0,
                 'dest_position' : [0,0]
             },
-            'CHARGING' : {
+            Enum.CHARGING : {
                 'previous_action' : Enum.INITIAL_STATE
             },
-            'ENTITY' : {
-
-            },
-            'TURNING' : {
+            Enum.TURNING : {
                 'heading' : 0,
                 'previous_action' : Enum.INITIAL_STATE
             }
@@ -243,13 +239,13 @@ class State():
         for i in range(len(waypointlists)):
             start_idx = 0
             for uavId,uavInfos in self.aliveUavList.items():
-                if uavInfos['ACTION_DETAIL']['WELCOME']['start_recovery_id'] == i :
-                    uavInfos['ACTION'] = Enum.SEARCHING
-                    uavInfos['ACTION_DETAIL']['SEARCH']['current_index'] = start_idx
-                    uavInfos['ACTION_DETAIL']['SEARCH']['total_points'] = waypointlists[i]
+                if uavInfos['STATE_DETAIL'][Enum.INITIAL_STATE]['start_recovery_id'] == i :
+                    uavInfos['STATE'] = Enum.SEARCHING
+                    uavInfos['STATE_DETAIL'][Enum.SEARCHING]['current_index'] = start_idx
+                    uavInfos['STATE_DETAIL'][Enum.SEARCHING]['total_points'] = waypointlists[i]
                     start_idx = (start_idx+1)%len(waypointlists[i])
 
-                    self.utils.go_way_points(uavId,start_idx,uavInfos['ACTION_DETAIL']['SEARCH']['total_points'])
+                    self.utils.go_way_points(uavId,start_idx,uavInfos['STATE_DETAIL'][Enum.SEARCHING]['total_points'])
                     self.searching.updateNextHeading(uavInfos)
         print(" - Done")
     
@@ -267,17 +263,17 @@ class State():
     def checkNeedToCharge(self, uavId):
         uavInfos = self.aliveUavList[uavId]
 
-        if uavInfos['ACTION'] != Enum.TRACKING and uavInfos['ACTION'] != Enum.CHARGING:
+        if uavInfos['STATE'] != Enum.TRACKING and uavInfos['STATE'] != Enum.CHARGING:
             fRemainFuel = uavInfos['OBJ'].getEnergyAvailable()
 
             if fRemainFuel < 50 : 
-                uavInfos['ACTION_DETAIL']['CHARGING']['previous_action'] = uavInfos['ACTION']
-                uavInfos['ACTION_DETAIL']['SEARCH']['is_scanning'] = True
-                uavInfos['ACTION'] = Enum.CHARGING
+                uavInfos['STATE_DETAIL'][Enum.CHARGING]['previous_action'] = uavInfos['STATE']
+                uavInfos['STATE_DETAIL'][Enum.SEARCHING]['is_scanning'] = True
+                uavInfos['STATE'] = Enum.CHARGING
                 print("UAV -", uavId," needs to charging")
 
     def updateUavAction(self, uavId):
-        state = self.aliveUavList[uavId]['ACTION']
+        state = self.aliveUavList[uavId]['STATE']
 
         # state check
         if state == Enum.INITIAL_STATE:
@@ -318,13 +314,13 @@ class State():
 
             for i in range(len(waypointlists)):
                 start_idx = 0
-                if uavInfos['ACTION_DETAIL']['WELCOME']['start_recovery_id'] == i :
-                    uavInfos['ACTION'] = Enum.SEARCHING
-                    uavInfos['ACTION_DETAIL']['SEARCH']['current_index'] = start_idx
-                    uavInfos['ACTION_DETAIL']['SEARCH']['total_points'] = waypointlists[i]
+                if uavInfos['STATE_DETAIL'][Enum.INITIAL_STATE]['start_recovery_id'] == i :
+                    uavInfos['STATE'] = Enum.SEARCHING
+                    uavInfos['STATE_DETAIL'][Enum.SEARCHING]['current_index'] = start_idx
+                    uavInfos['STATE_DETAIL'][Enum.SEARCHING]['total_points'] = waypointlists[i]
                     start_idx = (start_idx+1)%len(waypointlists[i])
 
-                    self.utils.go_way_points(uavId,start_idx,uavInfos['ACTION_DETAIL']['SEARCH']['total_points'])
+                    self.utils.go_way_points(uavId,start_idx,uavInfos['STATE_DETAIL'][Enum.SEARCHING]['total_points'])
                     self.searching.updateNextHeading(uavInfos)
             print(" - Done")
         else :
@@ -334,18 +330,20 @@ class State():
                                             for iUavId, oDeadUavInfos in self.deadUavList.items()]
 
             iNearestId = min(aDists, key = lambda i : i[1])[0] 
-            self.aliveUavList[uavId]['ACTION'] = self.deadUavList[iNearestId]['ACTION']
-            self.aliveUavList[uavId]['ACTION_DETAIL'] = self.deadUavList[iNearestId]['ACTION_DETAIL']
+            self.aliveUavList[uavId]['STATE'] = self.deadUavList[iNearestId]['STATE']
+            self.aliveUavList[uavId]['STATE_DETAIL'] = self.deadUavList[iNearestId]['STATE_DETAIL']
             
-            state = self.aliveUavList[uavId]['ACTION']
+            del self.deadUavList[iNearestId]
+
+            state = self.aliveUavList[uavId]['STATE']
             
             if state & Enum.CHARGING :
-                self.aliveUavList[uavId]['ACTION'] = self.aliveUavList[uavId]['ACTION_DETAIL']['CHARGING']['previous_action']
+                self.aliveUavList[uavId]['STATE'] = self.aliveUavList[uavId]['STATE_DETAIL'][Enum.CHARGING]['previous_action']
 
             if state & Enum.TRACKING :
-                self.aliveUavList[uavId]['ACTION'] = Enum.UNDERTAKED
-                self.aliveUavList[uavId]['ACTION_DETAIL']['UNDERTAKED']['tracking_zoneID'] = \
-                    self.aliveUavList[uavId]['ACTION_DETAIL']['TRACKING']['tracking_zoneID']
+                self.aliveUavList[uavId]['STATE'] = Enum.UNDERTAKED
+                self.aliveUavList[uavId]['STATE_DETAIL'][Enum.UNDERTAKED]['tracking_zoneID'] = \
+                    self.aliveUavList[uavId]['STATE_DETAIL'][Enum.TRACKING]['tracking_zoneID']
             
     def getUpdateInfos(self, uavId):
         self.getElevAndAlti(uavId)
@@ -359,7 +357,7 @@ class State():
         originalDirection = self.tracking.getOriginalDirection(uavInfos)
         paddingAlt = uavInfos['OBJ'].getHazardMaxRange()*0.5
         idealDist = uavInfos['OBJ'].getHazardMaxRange()*0.7
-        action = uavInfos['ACTION']
+        action = uavInfos['STATE']
 
         front_Alt = 0
         uavInfos['NEXT_ALTITUDE'] = self.utils.getElevation(uav_lat, uav_lon) + paddingAlt
@@ -397,9 +395,9 @@ class State():
                     i.set_Latitude(coord[0])
                     i.set_Longitude(coord[1])
 
-    def isScanning(self, uavId): return self.aliveUavList[uavId]['ACTION_DETAIL']['SEARCH']['is_scanning']
+    def isScanning(self, uavId): return self.aliveUavList[uavId]['STATE_DETAIL'][Enum.SEARCHING]['is_scanning']
     
-    def setScanning(self, uavId, state): self.aliveUavList[uavId]['ACTION_DETAIL']['SEARCH']['is_scanning'] = state
+    def setScanning(self, uavId, state): self.aliveUavList[uavId]['STATE_DETAIL'][Enum.SEARCHING]['is_scanning'] = state
 
     def hazardzoneDetected(self, hazardzoneDetected, detectedTime):
         if hazardzoneDetected.get_DetectedHazardZoneType() == 1 :
@@ -411,20 +409,20 @@ class State():
             if detectedTime == 0:
                 detectedTime = uavInfos['OBJ'].getTime()
             
-            if uavInfos['ACTION'] == Enum.TRACKING :
+            if uavInfos['STATE'] == Enum.TRACKING :
                 # already tracking
-                zoneId = uavInfos['ACTION_DETAIL']['TRACKING']['tracking_zoneID']
+                zoneId = uavInfos['STATE_DETAIL'][Enum.TRACKING]['tracking_zoneID']
                 zoneIdForCheck = self.detectedZones.isAlreadyDetectedZone(detectedPoint)
                 if zoneId == zoneIdForCheck:
                     if not self.putPointIntoZones(zoneId, detectedPoint):
                         return
 
                     self.tracking.gooutFromZone(uavInfos)
-                    uavInfos['ACTION_DETAIL']['TRACKING']['last_tracking_time'] = detectedTime
+                    uavInfos['STATE_DETAIL'][Enum.TRACKING]['last_tracking_time'] = detectedTime
                 else :
                     print("Found other zone")
 
-            elif uavInfos['ACTION'] & (Enum.SEARCHING|Enum.UNDERTAKED) :
+            elif uavInfos['STATE'] & (Enum.SEARCHING|Enum.UNDERTAKED) :
                 zoneId = self.detectedZones.isAlreadyDetectedZone(detectedPoint)
                 if zoneId != -1 :
                     # already detected
@@ -437,12 +435,12 @@ class State():
                     if self.numOfDroneInSameZone(zoneId) < 2 :
                         # partner
                         # tracking with different direction
-                        uavInfos['ACTION_DETAIL']['SEARCH']['is_scanning'] = False
-                        uavInfos['ACTION'] = Enum.TRACKING
-                        uavInfos['ACTION_DETAIL']['TRACKING']['tracking_zoneID'] = zoneId
-                        # uavInfos['ACTION_DETAIL']['TRACKING']['tracking_direction'] = -1 if uavInfos['OBJ'].getCameraAzimuth() > 0 else 1
+                        uavInfos['STATE_DETAIL'][Enum.SEARCHING]['is_scanning'] = False
+                        uavInfos['STATE'] = Enum.TRACKING
+                        uavInfos['STATE_DETAIL'][Enum.TRACKING]['tracking_zoneID'] = zoneId
+                        # uavInfos['STATE_DETAIL'][Enum.TRACKING]['tracking_direction'] = -1 if uavInfos['OBJ'].getCameraAzimuth() > 0 else 1
                         self.tracking.gooutFromZone(uavInfos)
-                        uavInfos['ACTION_DETAIL']['TRACKING']['last_tracking_time'] = detectedTime
+                        uavInfos['STATE_DETAIL'][Enum.TRACKING]['last_tracking_time'] = detectedTime
                     else : 
                         # entity search
                         # 반대 방향으로 나가 버리기
@@ -451,12 +449,12 @@ class State():
                     # new hazardzone
                     # tracking
                     print(" - Found New Fire Zone")
-                    uavInfos['ACTION_DETAIL']['SEARCH']['is_scanning'] = False
-                    uavInfos['ACTION'] = Enum.TRACKING
-                    uavInfos['ACTION_DETAIL']['TRACKING']['tracking_zoneID'] = self.detectedZones.addNewDetectedZone(detectedPoint)
-                    uavInfos['ACTION_DETAIL']['TRACKING']['tracking_direction'] = -1 if uavInfos['OBJ'].getCameraAzimuth() > 0 else 1
+                    uavInfos['STATE_DETAIL'][Enum.SEARCHING]['is_scanning'] = False
+                    uavInfos['STATE'] = Enum.TRACKING
+                    uavInfos['STATE_DETAIL'][Enum.TRACKING]['tracking_zoneID'] = self.detectedZones.addNewDetectedZone(detectedPoint)
+                    uavInfos['STATE_DETAIL'][Enum.TRACKING]['tracking_direction'] = -1 if uavInfos['OBJ'].getCameraAzimuth() > 0 else 1
                     self.tracking.gooutFromZone(uavInfos)
-                    uavInfos['ACTION_DETAIL']['TRACKING']['last_tracking_time'] = detectedTime
+                    uavInfos['STATE_DETAIL'][Enum.TRACKING]['last_tracking_time'] = detectedTime
                     # call friends
                     self.callMyFriend(entityId, detectedPoint)
                     
@@ -470,12 +468,12 @@ class State():
         uavInfos = self.aliveUavList[uavId]
         frinedInfos = self.findNearestFriend(uavId, detectedPoint)
 
-        frinedInfos['ACTION']= Enum.UNDERTAKED
-        frinedInfos['ACTION_DETAIL']['UNDERTAKED']['tracking_zoneID'] = uavInfos['ACTION_DETAIL']['TRACKING']['tracking_zoneID']
-        frinedInfos['ACTION_DETAIL']['UNDERTAKED']['dest_position'] = [detectedPoint.get_Latitude(), detectedPoint.get_Longitude()]
-        frinedInfos['ACTION_DETAIL']['TRACKING']['tracking_direction'] = uavInfos['ACTION_DETAIL']['TRACKING']['tracking_direction']*(-1)
+        frinedInfos['STATE']= Enum.UNDERTAKED
+        frinedInfos['STATE_DETAIL'][Enum.UNDERTAKED]['tracking_zoneID'] = uavInfos['STATE_DETAIL'][Enum.TRACKING]['tracking_zoneID']
+        frinedInfos['STATE_DETAIL'][Enum.UNDERTAKED]['dest_position'] = [detectedPoint.get_Latitude(), detectedPoint.get_Longitude()]
+        frinedInfos['STATE_DETAIL'][Enum.TRACKING]['tracking_direction'] = uavInfos['STATE_DETAIL'][Enum.TRACKING]['tracking_direction']*(-1)
         
-        print(" - Called Friend -",frinedInfos['OBJ'].getID(), "ACTION :", frinedInfos['ACTION'])
+        print(" - Called Friend -",frinedInfos['OBJ'].getID(), "ACTION :", frinedInfos['STATE'])
 
     def findNearestFriend(self, uavId, oDetectedPoint):
         # 시간으로 가장 빨리올수 있는 친구 부르고
@@ -483,7 +481,7 @@ class State():
         # tracking_zoneID를 같은 ID 로        
         aDists = [(iUavId, self.utils.distance(oDetectedPoint.get_Longitude(), oDetectedPoint.get_Latitude(),
                                             oUavInfos['OBJ'].getLongitude(), oUavInfos['OBJ'].getLatitude())/oUavInfos['OBJ'].getAirspeed()) 
-                                            for iUavId, oUavInfos in self.aliveUavList.items() if iUavId != uavId and oUavInfos['STATE'] == Enum.STATE_ALIVE]
+                                            for iUavId, oUavInfos in self.aliveUavList.items() if iUavId != uavId]
 
         iNearestId = min(aDists, key = lambda i : i[1])[0] 
         return self.aliveUavList[iNearestId]
@@ -497,9 +495,8 @@ class State():
         return True
     
     def numOfDroneInSameZone(self, zoneId):
-        aUavZoneList = [ 1 for uavInfos in self.aliveUavList.values() if uavInfos['STATE'] == Enum.STATE_ALIVE and 
-                        uavInfos['ACTION'] & (Enum.TRACKING) and
-                        uavInfos['ACTION_DETAIL']['TRACKING']['tracking_zoneID'] == zoneId]
+        aUavZoneList = [ 1 for uavInfos in self.aliveUavList.values() if uavInfos['STATE'] & (Enum.TRACKING) and
+                        uavInfos['STATE_DETAIL'][Enum.TRACKING]['tracking_zoneID'] == zoneId]
 
         return sum(aUavZoneList)
 
@@ -520,11 +517,12 @@ class State():
                 dist = new_dist
                 pointId = i
 
-        uavInfos['ACTION_DETAIL']['WELCOME']['start_recovery_id']= pointId
-        uavInfos['ACTION_DETAIL']['WELCOME']['recovery_point'] = self.aRecoveryPoints[pointId]
+        uavInfos['STATE_DETAIL'][Enum.INITIAL_STATE]['start_recovery_id']= pointId
+        uavInfos['STATE_DETAIL'][Enum.INITIAL_STATE]['recovery_point'] = self.aRecoveryPoints[pointId]
 
     def removedUavUpdate(self, uavId):
-        self.aliveUavList[uavId]['STATE'] = Enum.STATE_DEAD
+        oDeadUavInfos = self.aliveUavList.pop('uavId')
+        self.deadUavList[uavId] = oDeadUavInfos
 
     def getDist(self, uavId1, uavId2):
 
