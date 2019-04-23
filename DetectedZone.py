@@ -48,8 +48,8 @@ class DetectedZone():
 
         for point in self.zones[zoneId] :
             lat += point.get_Latitude()
-            lon += point.get_Latitude()
-
+            lon += point.get_Longitude()
+        
         return [lat/len(self.zones[zoneId]), lon/len(self.zones[zoneId])]
 
     def sendEstimateCmd(self):

@@ -83,7 +83,6 @@ class InitialSearch():
         uav_lat = uavInfos['OBJ'].getLatitude()
         uav_lon = uavInfos['OBJ'].getLongitude()
 
-        print(uavInfos['OBJ'].getID(), self.utils.distance(uav_lon, uav_lat, current_seacrh_point_loc[1], current_seacrh_point_loc[0]))
         return self.utils.distance(uav_lon, uav_lat, current_seacrh_point_loc[1], current_seacrh_point_loc[0]) <= self.threshold
         
     def movetoNextPoint(self, uavInfos):
@@ -112,7 +111,7 @@ class InitialSearch():
 
         heading = self.utils.getHeadingToDest(uav_lat, uav_lon, current_seacrh_point_loc[0], current_seacrh_point_loc[1])
 
-        print("next heading will be ", heading)
+        # print("next heading will be ", heading)
 
         # need to fix the direction
         uavInfos['NEXT_HEADING'] = heading

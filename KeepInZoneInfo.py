@@ -61,14 +61,17 @@ class KeepInZoneInfo():
         
         center_lat = self.CenterLatitude
         center_lon = self.CenterLongitude
-        width = self.Width / 100000
-        height = self.Height / 100000
+        # width = self.Width / 100000
+        # height = self.Height / 100000
 
-        left = center_lon - (width / 2)
-        right = center_lon + (width / 2)
-        top = center_lat + (height / 2)
-        bottom = center_lat - (height / 2)
-
+        # left = center_lon - (width / 2)
+        # right = center_lon + (width / 2)
+        # top = center_lat + (height / 2)
+        # bottom = center_lat - (height / 2)
+        top = 40.0958
+        bottom = 39.5175
+        left = -121.4353
+        right = -120.6826
         points = [[top,left], [top, right], [bottom, right], [bottom, left]]
         return points
     # ===========================================

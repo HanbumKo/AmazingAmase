@@ -413,14 +413,14 @@ class VoronoiSearch():
             self.points[i] = np.array(self.points[i])
         self.points = np.array(self.points)
 
-        self.points[0][0] -= 0.04
-        self.points[1][0] -= 0.04
-        self.points[2][0] += 0.04
-        self.points[3][0] += 0.04
-        self.points[0][1] -= 0.03
-        self.points[1][1] += 0.03
-        self.points[2][1] += 0.03
-        self.points[3][1] -= 0.03
+        # self.points[0][0] -= 0.04
+        # self.points[1][0] -= 0.04
+        # self.points[2][0] += 0.04
+        # self.points[3][0] += 0.04
+        # self.points[0][1] -= 0.03
+        # self.points[1][1] += 0.03
+        # self.points[2][1] += 0.03
+        # self.points[3][1] -= 0.03
 
 
         # # LEFT DOWN
