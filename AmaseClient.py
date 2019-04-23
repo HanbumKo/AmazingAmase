@@ -158,8 +158,6 @@ class SampleHazardDetector(IDataReceived):
             elif isinstance(lmcpObject, AirVehicleConfiguration):
                 print(" - Add new drone during playing")
                 self.drones.addNewUAV(lmcpObject)
-                self.drones.setClosestRecoveryPoint(lmcpObject.get_ID())
-                self.drones.setNewDroneAction(lmcpObject.get_ID())
                 print(" - Done")
             elif isinstance(lmcpObject, HazardZoneDetection):
                 # detection !!! 

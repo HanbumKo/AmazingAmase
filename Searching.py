@@ -3,7 +3,7 @@ import Utils
 import VoronoiForInitialSearch
 
 import math
-class InitialSearch():
+class Searching():
 
     def __init__(self, utils, NumberofDrones, keepinzone, recoveryzone, startway):
         self.utils = utils
@@ -55,7 +55,7 @@ class InitialSearch():
     def getWayPointLists(self): return self.waypointlists
 
 
-    def updateSearchingPoint(self, uavInfos):
+    def updateSearchingState(self, uavInfos):
         # if current drone finished searching current_point => this condition depends on the searching way.
 
         # uavInfos = { 
@@ -77,8 +77,8 @@ class InitialSearch():
             self.updateNextHeading(uavInfos)
 
     def checkWhetherSearched(self, uavInfos):
-        current_seacrh_point_idx = uavInfos['ACTION_DETAIL']['SEARCH']['current_index']
-        current_seacrh_point_loc = uavInfos['ACTION_DETAIL']['SEARCH']['total_points'][current_seacrh_point_idx]
+        current_seacrh_point_idx = uavInfos['STATE_DETAIL'][Enum.SEARCHING]['current_index']
+        current_seacrh_point_loc = uavInfos['STATE_DETAIL'][Enum.SEARCHING]['total_points'][current_seacrh_point_idx]
 
         uav_lat = uavInfos['OBJ'].getLatitude()
         uav_lon = uavInfos['OBJ'].getLongitude()
@@ -86,8 +86,8 @@ class InitialSearch():
         return self.utils.distance(uav_lon, uav_lat, current_seacrh_point_loc[1], current_seacrh_point_loc[0]) <= self.threshold
         
     def movetoNextPoint(self, uavInfos):
-        next_seacrh_point_idx = (uavInfos['ACTION_DETAIL']['SEARCH']['current_index'] + 1)%len(uavInfos['ACTION_DETAIL']['SEARCH']['total_points'])
-        next_seacrh_point_loc = uavInfos['ACTION_DETAIL']['SEARCH']['total_points'][next_seacrh_point_idx]
+        next_seacrh_point_idx = (uavInfos['STATE_DETAIL'][Enum.SEARCHING]['current_index'] + 1)%len(uavInfos['STATE_DETAIL'][Enum.SEARCHING]['total_points'])
+        next_seacrh_point_loc = uavInfos['STATE_DETAIL'][Enum.SEARCHING]['total_points'][next_seacrh_point_idx]
 
         uav_lat = uavInfos['OBJ'].getLatitude()
         uav_lon = uavInfos['OBJ'].getLongitude()
@@ -100,11 +100,11 @@ class InitialSearch():
         uavInfos['NEXT_HEADING'] = heading
         uavInfos['NEXT_AZIMUTH'] = {'start': -45, 'end': 45, 'rate': 45}
 
-        uavInfos['ACTION_DETAIL']['SEARCH']['current_index'] = next_seacrh_point_idx 
+        uavInfos['STATE_DETAIL'][Enum.SEARCHING]['current_index'] = next_seacrh_point_idx 
 
     def updateNextHeading(self, uavInfos):
-        current_seacrh_point_idx = uavInfos['ACTION_DETAIL']['SEARCH']['current_index']
-        current_seacrh_point_loc = uavInfos['ACTION_DETAIL']['SEARCH']['total_points'][current_seacrh_point_idx]
+        current_seacrh_point_idx = uavInfos['STATE_DETAIL'][Enum.SEARCHING]['current_index']
+        current_seacrh_point_loc = uavInfos['STATE_DETAIL'][Enum.SEARCHING]['total_points'][current_seacrh_point_idx]
 
         uav_lat = uavInfos['OBJ'].getLatitude()
         uav_lon = uavInfos['OBJ'].getLongitude()
