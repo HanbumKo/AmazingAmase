@@ -31,32 +31,32 @@ class Tracking():
             self.gointoZone(uavInfos)
         else : 
             # got lost
-            uavInfos['ACTION'] = Enum.ACTION_SEARCHING
+            uavInfos['STATE'] = Enum.SEARCHING
         
     def isStillTracking(self, uavInfos):
         # tracking condition : interval between current time and last_tracking_time
-        last_tracking_time = uavInfos['ACTION_DETAIL']['TRACKING']['last_tracking_time']
+        last_tracking_time = uavInfos['STATE_DETAIL'][Enum.TRACKING]['last_tracking_time']
         current_time = uavInfos['OBJ'].getTime()
 
         return (current_time - last_tracking_time)//1000 < 45
     
     def gointoZone(self, uavInfos):
-        msg = uavInfos['ACTION_DETAIL']['TRACKING']['msg']
+        msg = uavInfos['STATE_DETAIL'][Enum.TRACKING]['msg']
 
         if msg == 1:
-            uavInfos['ACTION_DETAIL']['TRACKING']['msg'] = -1
+            uavInfos['STATE_DETAIL'][Enum.TRACKING]['msg'] = -1
         elif msg == -1 :
             originalDirection = self.getOriginalDirection(uavInfos)
             azimuth = uavInfos['OBJ'].getCameraAzimuth()
-            direction = uavInfos['ACTION_DETAIL']['TRACKING']['tracking_direction']
+            direction = uavInfos['STATE_DETAIL'][Enum.TRACKING]['tracking_direction']
 
             uavInfos['NEXT_HEADING'] = originalDirection+direction*(self.change)*(-1)
             if azimuth > 45 or azimuth < -45 :
                 uavInfos['NEXT_AZIMUTH'] = azimuth + direction*(self.change)
 
     def gooutFromZone(self, uavInfos):
-        direction = uavInfos['ACTION_DETAIL']['TRACKING']['tracking_direction']
-        uavInfos['ACTION_DETAIL']['TRACKING']['msg'] = 1
+        direction = uavInfos['STATE_DETAIL'][Enum.TRACKING]['tracking_direction']
+        uavInfos['STATE_DETAIL'][Enum.TRACKING]['msg'] = 1
 
         originalDirection = self.getOriginalDirection(uavInfos)
         azimuth = uavInfos['OBJ'].getCameraAzimuth()
@@ -64,7 +64,7 @@ class Tracking():
 
         uavInfos['NEXT_HEADING'] =  originalDirection+direction*(self.change)
 
-        if azimuth < 90 and azimuth > -90:
+        if azimuth < 45 and azimuth > -45:
             uavInfos['NEXT_AZIMUTH'] = azimuth + direction*(self.change)*(-1)
             
 

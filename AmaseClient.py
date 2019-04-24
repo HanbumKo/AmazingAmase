@@ -59,6 +59,9 @@ class SampleHazardDetector(IDataReceived):
         self.isStepOne = True
         self.isStepTwo = False
         self.isStepThree = False
+
+        # array KeepInZonePoints
+        self.aKeepInZones = None
     
     def dataReceived(self, lmcpObject):
         scenarioTime = 0
@@ -98,8 +101,8 @@ class SampleHazardDetector(IDataReceived):
                     self.keepInZone.updateKeepInZone(lmcpObject)
                     print(" - Done")
                     print(" - Read Dted data")
-                    aKeepInZones = self.keepInZone.getPoints()
-                    #self.utils.getElevations(aKeepInZones[0][0], aKeepInZones[0][1], aKeepInZones[2][0], aKeepInZones[2][1], 1 / 3600)
+                    self.aKeepInZones = self.keepInZone.getPoints()
+                    self.utils.getElevations(self.aKeepInZones[0][0], self.aKeepInZones[0][1], self.aKeepInZones[2][0], self.aKeepInZones[2][1], 1 / 3600)
                     print(" - Done")
 
                 elif isinstance(lmcpObject, RecoveryPoint):
@@ -112,15 +115,21 @@ class SampleHazardDetector(IDataReceived):
             else :
                 print(" - - - - - PHASE : UPDATE - - - - - ")
                 # calculate for initialsearch
-                aKeepInZones, aRecoveryPoints = self.getListForInitialSearch()
+                self.aRecoveryPoints = [[point.getLatitude(), point.getLongitude()] for point in self.recoveryList]
                 print(" - Assign initialsearch path")
-                self.drones.assignInitialSearchPath(aKeepInZones, aRecoveryPoints, Enum.INIT_START_NEAREST)
+                self.drones.assignInitialSearchPath(self.aKeepInZones, self.aRecoveryPoints, Enum.INIT_START_NEAREST)
                 print(" - Done")
                 self.iPhase = Enum.PHASE_UPDATE
                 print(" - - - - - - - - - - - - - - - - - - - ")
         elif self.iPhase == Enum.PHASE_UPDATE:
             if isinstance(lmcpObject, AirVehicleState):
                 self.drones.updateUAV(lmcpObject)
+
+                # check still in keepinzone
+                self.drones.checkStillInKeep(self.aKeepInZones, lmcpObject.get_ID())
+
+                # checkNeedToCharge
+                self.drones.checkNeedToCharge(lmcpObject.get_ID())
 
                 # make a command for drones, heading, azimuth update
                 self.drones.updateUavAction(lmcpObject.get_ID())
@@ -159,22 +168,23 @@ class SampleHazardDetector(IDataReceived):
 
                     # send cmd to drone
                     self.utils.sendHeadingAndAltitudeCmd(lmcpObject.get_DetectingEnitiyID(), heading, altitude)
-                    self.utils.sendGimbalAzimuthAndElevationCmd(lmcpObject.get_DetectingEnitiyID(), azimuth, elevation)
+
+                    if type(azimuth) == dict :
+                        if not self.drones.isScanning(lmcpObject.get_DetectingEnitiyID()) :
+                            # self.utils.sendGimbalAzimuthAndElevationScanCmd(
+                            #     lmcpObject.get_ID(), azimuth['start'], azimuth['end'], azimuth['rate'],
+                            #     elevation, elevation, 0, 0)
+                            self.utils.sendGimbalAzimuthAndElevationScanCmd(
+                                lmcpObject.get_DetectingEnitiyID(), azimuth['start'], azimuth['end'], azimuth['rate'])
+                            self.drones.setScanning(lmcpObject.get_DetectingEnitiyID(), True)
+                    else :
+                        self.utils.sendGimbalAzimuthAndElevationCmd(lmcpObject.get_DetectingEnitiyID(), azimuth, elevation)
                 else :
                     pass
             elif isinstance(lmcpObject, RemoveEntities):
                 print(" - Update removed uav state")
-                self.drones.removedUavUpdate(lmcpObject.get_EntityList[0])
+                self.drones.removedUavUpdate(lmcpObject.get_EntityList()[0])
                 print(" - Done")
-
-    def getListForInitialSearch(self):
-        aKeepInZones = []
-        aRecoveryPoints = []
-
-        aKeepInZones = self.keepInZone.getPoints()
-        aRecoveryPoints = [[point.getLatitude(), point.getLongitude()] for point in self.recoveryList]
-
-        return aKeepInZones, aRecoveryPoints
 
 #################
 ## Main
