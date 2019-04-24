@@ -33,7 +33,7 @@ class InitialSearch():
         '''
         try:
             self.initialsearchpoints = VoronoiForInitialSearch.VoronoiSearch(pointlist, nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone, startway)
-            # print("DeBug...")
+            print("DeBug...")
             self.initialsearchpoints.voronoialgo()
             print("SEARCHCOORD\n", self.initialsearchpoints.searchcoord)
             print("SEARCHROUTE\n", self.initialsearchpoints.searchroute)

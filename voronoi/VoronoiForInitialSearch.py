@@ -17,6 +17,7 @@ class VoronoiSearch():
         self.number_drone_each_recoveryzone = numberofdroneeachrecoveryzone
         self.searchcoord = []
         self.searchroute = []
+        print("pointlist\n",pointlist)
         '''
         startway
         0 = nearest
@@ -380,35 +381,38 @@ class VoronoiSearch():
         tri = Delaunay(self.points)
         vor = Voronoi(self.points[4:])
         regions, vertices = self.voronoi_finite_polygons_2d(vor)
+        # print(regions, vertices)
 
         '''
         Visualization
         '''
         fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
 
-        ax1.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
-        ax1.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
-        ax2.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
-        ax2.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
-        ax3.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
-        ax3.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
-        ax4.set_ylim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
-        ax4.set_xlim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
+        # ax1.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
+        # ax1.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
+        # ax2.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
+        # ax2.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
+        # ax3.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
+        # ax3.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
+        # ax4.set_ylim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
+        # ax4.set_xlim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
 
-        # ax1.set_xlim([self.points[2][0], self.points[1][0]])
-        # ax1.set_ylim([self.points[0][1], self.points[1][1]])
-        # ax2.set_xlim([self.points[2][0], self.points[1][0]])
-        # ax2.set_ylim([self.points[0][1], self.points[1][1]])
-        # ax3.set_xlim([self.points[2][0], self.points[1][0]])
-        # ax3.set_ylim([self.points[0][1], self.points[1][1]])
-        # ax4.set_xlim([self.points[2][0], self.points[1][0]])
-        # ax4.set_ylim([self.points[0][1], self.points[1][1]])
+        ax1.set_xlim([self.points[2][0], self.points[1][0]])
+        ax1.set_ylim([self.points[0][1], self.points[1][1]])
+        ax2.set_xlim([self.points[2][0], self.points[1][0]])
+        ax2.set_ylim([self.points[0][1], self.points[1][1]])
+        ax3.set_xlim([self.points[2][0], self.points[1][0]])
+        ax3.set_ylim([self.points[0][1], self.points[1][1]])
+        ax4.set_xlim([self.points[2][0], self.points[1][0]])
+        ax4.set_ylim([self.points[0][1], self.points[1][1]])
 
         # print(self.points)
         # print(type(self.points[0]))
         # print(type(self.points))
-        ax1.triplot(self.points[:, 0], self.points[:, 1], tri.simplices.copy())
+        #ax1.triplot(self.points[:, 0], self.points[:, 1], tri.simplices.copy())
         ax1.plot(self.points[:, 0], self.points[:, 1], 'o')
+        for i in range(len(self.points)):
+            ax1.text(self.points[i][0], self.points[i][1],'{}'.format(i), fontsize=6)
 
         polygon_count=0
         region_count=0
@@ -433,7 +437,7 @@ class VoronoiSearch():
             in_keepinzone_points_list = []
 
             polygon = vertices[region]
-            ax2.fill(*zip(*polygon), alpha=0.4)
+            ax1.fill(*zip(*polygon), alpha=0.4)
             # print("-------------")
             # print("  ",str(polygon_count),"  ")
             # print(vertices[region])
@@ -442,6 +446,7 @@ class VoronoiSearch():
             Points of Each polygon
             '''
             for countvertices in range(len(vertices[region])):
+                # print(countvertices, vertices[region])
                 if vertices[region][countvertices][0] > sx and vertices[region][countvertices][0] < lx:
                     if vertices[region][countvertices][1] > sy and  vertices[region][countvertices][1] < ly:
                         # print(vertices[region][countvertices])
@@ -449,6 +454,7 @@ class VoronoiSearch():
                         # print(region[region_count])
                         in_keepinzone_points_list.append(region[region_count])
                 region_count += 1
+            # print("in_keepinzone_points_list\n",in_keepinzone_points_list)
 
             '''
             keepinzone과 voronoi영역 만나는 점 추가
@@ -466,6 +472,7 @@ class VoronoiSearch():
             Visualization
             '''
             in_keepinzone_points_coord = np.array(in_keepinzone_points_coord)
+            # print("in_keepinzone_points_coord",in_keepinzone_points_coord)
             ax2.plot(in_keepinzone_points_coord[:,0], in_keepinzone_points_coord[:,1], 'o')
             ax2.plot(self.points[polygon_count+4, 0], self.points[polygon_count+4, 1],'v')
             ax2.text(self.points[polygon_count+4, 0], self.points[polygon_count+4, 1]+0.01,'{}'.format(polygon_count), fontsize=6)
@@ -613,7 +620,7 @@ class VoronoiSearch():
         # print(smallpointslist_idx)
         #
         # print("distancelist\n",np.array(distancelist))
-        print("shortestroute\n",shortestroute)
+        # print("shortestroute\n",shortestroute)
         self.searchcoord = totalpoints
         self.searchroute = shortestroute
         plt.show()
@@ -634,14 +641,41 @@ if __name__ == '__main__':
     # # RIHGT DOWN
     # pointlist[3] = [39.5177 + 0.04, -121.4366 - 0.03]
     #
+
+    # [[40.12915016547195, -121.38244270915412],
+    # [40.12915016547195, -120.73870509196662],
+    # [39.48541254828445, -120.73870509196662],
+    # [39.48541254828445, -121.38244270915412],
+
+
     # LEFT DOWN
-    pointlist[0] = [40.12915017, -121.4366]
+    pointlist[0] = [40.12915016547195, -121.38244270915412]
     # LEFT UP
-    pointlist[1] = [40.12915017, -120.6866]
+    pointlist[1] = [40.12915016547195, -120.73870509196662]
     # RIGHT UP
-    pointlist[2] = [39.5177, -120.6866]
+    pointlist[2] = [39.48541254828445, -120.73870509196662]
     # RIHGT DOWN
-    pointlist[3] = [39.5177, -121.4366]
+    pointlist[3] = [39.48541254828445, -121.38244270915412]
+
+    pointlist[0][0] -= 0.04
+    pointlist[1][0] -= 0.04
+    pointlist[2][0] += 0.04
+    pointlist[3][0] += 0.04
+    pointlist[0][1] -= 0.04
+    pointlist[1][1] += 0.04
+    pointlist[2][1] += 0.04
+    pointlist[3][1] -= 0.04
+
+    # # LEFT DOWN
+    # pointlist[0] = [40.12915016547195 - 0.04, -121.38244270915412 - 0.04]
+    # # LEFT UP
+    # pointlist[1] = [40.12915016547195 - 0.04, -120.73870509196662 + 0.04]
+    # # RIGHT UP
+    # pointlist[2] = [39.48541254828445 + 0.04, -120.73870509196662 + 0.04]
+    # # RIHGT DOWN
+    # pointlist[3] = [39.48541254828445 + 0.04, -121.38244270915412 - 0.04]
+
+
 
     # pointlist[4] = [39.9258, -121.2517]
     # pointlist[5] = [39.9919, -120.8328]
@@ -650,9 +684,13 @@ if __name__ == '__main__':
     # pointlist[8] = [39.8012, -121.1]
     # pointlist[9] = [39.8094, -120.828]
 
-    pointlist[4] = [39.9062, -121.336]
-    pointlist[5] = [39.552, -121.0846]
-    pointlist[6] = [39.712, -120.7326]
+    # [39.67373735542855, -121.09310442995925],
+    # [39.89002837171417, -121.37997270775406],
+    # [39.74826691717287, -120.71877896871565]]
+
+    pointlist[4] = [39.67373735542855, -121.09310442995925]
+    pointlist[5] = [39.89002837171417, -121.37997270775406]
+    pointlist[6] = [39.74826691717287, -120.71877896871565]
 
 
     pointlist = np.array(pointlist)
