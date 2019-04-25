@@ -18,8 +18,8 @@ class Searching():
 
         nkeepinzone = len(keepinzone)
         nrecoveryzone = len(recoveryzone)
-        numberofdroneeachrecoveryzone = NumberofDrones / nrecoveryzone
-        print("numberofdroneeachrecoveryzone",int(numberofdroneeachrecoveryzone))
+        numberofdroneeachrecoveryzone = int(NumberofDrones / nrecoveryzone)
+        #print("numberofdroneeachrecoveryzone",int(numberofdroneeachrecoveryzone))
         pointlist = [[] for _ in range(nkeepinzone + nrecoveryzone)]
 
         for i in range(nkeepinzone):

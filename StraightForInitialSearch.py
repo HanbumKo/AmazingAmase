@@ -308,10 +308,10 @@ class StraightSearch():
 
     def straightalgo(self):
 
-        sx = self.points[2][0]
-        lx = self.points[0][0]
-        sy = self.points[0][1]
-        ly = self.points[2][1]
+        # sx = self.points[2][0]
+        # lx = self.points[0][0]
+        # sy = self.points[0][1]
+        # ly = self.points[2][1]
 
         way = self.decideway()
         '''
@@ -324,24 +324,24 @@ class StraightSearch():
         # print(boundry_width_term, boundry_height_term)
         # print(boundry_width_term*3)
         # print(self.__height)
-        drone_width_term = boundry_width_term / self.number_drone_each_recoveryzone
-        drone_height_term = boundry_height_term / self.number_drone_each_recoveryzone
+        # drone_width_term = boundry_width_term / self.number_drone_each_recoveryzone
+        # drone_height_term = boundry_height_term / self.number_drone_each_recoveryzone
         keep_top_left = self.points[2]
         keep_bottom_right = self.points[0]
         '''
         Visualization
         '''
-        fig, [[ax1, ax2],[ax3, ax4]]= plt.subplots(nrows=2, ncols=2)
+        # fig, [[ax1, ax2],[ax3, ax4]]= plt.subplots(nrows=2, ncols=2)
 
-        ax1.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
-        ax1.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
-        ax2.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
-        ax2.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
-        ax3.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
-        ax3.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
-        ax1.plot(self.points[:, 0], self.points[:, 1], 'o')
-        for i in range(len(self.points)):
-            ax1.text(self.points[i][0],self.points[i][1],'{}'.format(i))
+        # ax1.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
+        # ax1.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
+        # ax2.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
+        # ax2.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
+        # ax3.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
+        # ax3.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
+        # ax1.plot(self.points[:, 0], self.points[:, 1], 'o')
+        # for i in range(len(self.points)):
+        #     ax1.text(self.points[i][0],self.points[i][1],'{}'.format(i))
 
         drone_start_position = [[[] for _ in range(self.number_drone_each_recoveryzone)] for _ in range(self.number_recoveryzone)]
         box_of_list = [[] for _ in range(self.number_recoveryzone)]
@@ -375,11 +375,6 @@ class StraightSearch():
                 test.append(np.array(np.array(box_of_list[i][0])+np.array(box_of_list[i][1])+np.array([keep_top_left[0] + interval_box * (i+1), keep_top_left[1]])+np.array([keep_top_left[0] + interval_box * (i+1), keep_bottom_right[1]])) / 4)
 
                 for j in range(self.number_drone_each_recoveryzone):
-                    # drone_start_position[i][j].append([box_of_list[i][0][0] + drone_interval, box_of_list[i][0][1] - (drone_interval*6*j)- drone_interval])
-                    # drone_start_position[i][j].append([box_of_list[i][1][0] - drone_interval, box_of_list[i][1][1] - (drone_interval*6*j)- drone_interval])
-                    # drone_start_position[i][j].append([box_of_list[i][1][0] - drone_interval, box_of_list[i][1][1] - (drone_interval*6*j)- drone_interval*5])
-                    # drone_start_position[i][j].append([box_of_list[i][0][0] + drone_interval, box_of_list[i][0][1] - (drone_interval*6*j)- drone_interval*5])
-
                     drone_start_position[i][j].append([box_of_list[i][0][0] + (drone_interval * 6 * j) + drone_interval, box_of_list[i][0][1] - drone_interval])
                     drone_start_position[i][j].append([box_of_list[i][1][0] + (drone_interval * 6 * j) + drone_interval, box_of_list[i][1][1] + drone_interval])
                     drone_start_position[i][j].append([box_of_list[i][1][0] + (drone_interval * 6 * j) + drone_interval*5, box_of_list[i][1][1] + drone_interval])
@@ -388,20 +383,20 @@ class StraightSearch():
 
 
 
-        test = np.array(test)
-        ax1.plot(test[:, 0], test[:, 1], 'v')
+        # test = np.array(test)
+        # ax1.plot(test[:, 0], test[:, 1], 'v')
 
-        for i in range(len(test)):
-            ax1.text(test[i][0],test[i][1],'{}'.format(i))
+        # for i in range(len(test)):
+        #     ax1.text(test[i][0],test[i][1],'{}'.format(i))
 
-        box_of_list = np.array(box_of_list)
-        # drone_start_position = np.array(drone_start_position)
-        # print("box_of_list\n", box_of_list)
-        # print("drone_start_position\n",drone_start_position)
-        for i in range(len(box_of_list)):
-            ax2.plot(box_of_list[i][:, 0], box_of_list[i][:, 1], 'v')
-
-        ax3.plot(self.points[:, 0], self.points[:, 1], 'o')
+        # box_of_list = np.array(box_of_list)
+        # # drone_start_position = np.array(drone_start_position)
+        # # print("box_of_list\n", box_of_list)
+        # # print("drone_start_position\n",drone_start_position)
+        # for i in range(len(box_of_list)):
+        #     ax2.plot(box_of_list[i][:, 0], box_of_list[i][:, 1], 'v')
+        #
+        # ax3.plot(self.points[:, 0], self.points[:, 1], 'o')
 
         # for i in range(len(box_of_list)):
         #     ax3.plot(box_of_list[i][:, 0], box_of_list[i][:, 1], 'ko')
