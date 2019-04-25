@@ -665,6 +665,7 @@ class VoronoiSearch():
         # print("shortestroute\n",shortestroute)
         self.searchcoord = totalpoints
         self.searchroute = shortestroute
+        return waypointlist
         # plt.show()
 
 # if __name__ == '__main__':

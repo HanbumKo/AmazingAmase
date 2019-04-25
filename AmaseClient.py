@@ -102,7 +102,7 @@ class SampleHazardDetector(IDataReceived):
                     print(" - Done")
                     print(" - Read Dted data")
                     self.aKeepInZones = self.keepInZone.getPoints()
-                    self.utils.getElevations(self.aKeepInZones[0][0], self.aKeepInZones[0][1], self.aKeepInZones[2][0], self.aKeepInZones[2][1], 1 / 3600)
+                    #self.utils.getElevations(self.aKeepInZones[0][0], self.aKeepInZones[0][1], self.aKeepInZones[2][0], self.aKeepInZones[2][1], 1 / 3600)
                     print(" - Done")
 
                 elif isinstance(lmcpObject, RecoveryPoint):
@@ -154,7 +154,8 @@ class SampleHazardDetector(IDataReceived):
                         self.drones.setScanning(lmcpObject.get_ID(), True)
                 else :
                     self.utils.sendGimbalAzimuthAndElevationCmd(lmcpObject.get_ID(), azimuth, elevation)
-
+                    
+                self.drones.checkTotalState(lmcpObject.get_ID())
             elif isinstance(lmcpObject, AirVehicleConfiguration):
                 print(" - Add new drone during playing")
                 self.drones.addNewUAV(lmcpObject)
