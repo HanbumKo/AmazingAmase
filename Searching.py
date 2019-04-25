@@ -40,6 +40,7 @@ class Searching():
             self.waypointlists = self.initialsearchpoints.voronoialgo()
         except:
             ### TODO : Implement the way to set waypoints without voronoi
+            print("DeBug...2")
             self.initialsearchpoints = StraightForInitialSearch.StraightSearch(np.array(pointlist), nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone)
             self.waypointlists = self.initialsearchpoints.straightalgo()
             print("CAN'T VORONOI!!")
