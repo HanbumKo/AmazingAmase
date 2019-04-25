@@ -106,10 +106,11 @@ class State():
         # 1. 자기 리커버리 영역 부터 확인
         aFreeDronesForAll = []
         # 리커버리 영역 별로 할당
+        print(len(self.stateForCoordination['Searching']))
         for iRecoveryId in range(len(self.stateForCoordination['Searching'])):
             aFreeDrones = [iUavId for iUavId, oUavInfos in self.aliveUavList.items() 
                             if oUavInfos['STATE'] == Enum.INITIAL_STATE and oUavInfos['STATE_DETAIL'][Enum.INITIAL_STATE]['start_recovery_id'] == iRecoveryId ]
-            
+            print(iRecoveryId)
             if len(aFreeDrones) != 0 :
                 dRecoveryArea = self.stateForCoordination['Searching']['RecoveryArea_'+str(iRecoveryId)]
                 
@@ -127,12 +128,14 @@ class State():
                 if len(aFreeDrones) == 0 :
                     continue
 
-                print(" - Deal with Zero")
+                print(" - Deal with Low")
                 aFreeDrones = self.dealwithLow(dRecoveryArea, aProgIsLow, aFreeDrones)
                 print(" - Done")
                 # 남은 드론 수가 없다면 그냥 종료
                 if len(aFreeDrones) != 0 :
-                    aFreeDronesForAll.append(aFreeDrones)
+                    print(" - ! Drones left")
+                    print(aFreeDrones)
+                    aFreeDronesForAll+=aFreeDrones
 
         if len(aFreeDronesForAll) != 0 :
             # 리커버리 존에 맞춰서 나누고도 남은 드론들
