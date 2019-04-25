@@ -73,9 +73,14 @@ class State():
         # recoverypoints
         self.aRecoveryPoints = None
 
-    def checkTotalState(self):
-        self.checkTrackingState()
-        self.checkSearchingState()
+    def checkTotalState(self, uavId):
+        if max(list(self.aliveUavList.keys())) == uavId :
+            print(" - Check tracking state")
+            self.checkTrackingState()
+            print(" - Done")
+            print(" - Check searching state")
+            self.checkSearchingState()
+            print(" - Done")
     
     def checkTrackingState(self):
         iNumOfHZ = len(self.stateForCoordination['Tracking'])
@@ -84,7 +89,7 @@ class State():
             return
         
         for index in range(iNumOfHZ):
-            hazardZone = self.stateForCoordination['Tracking']['HazardZone_'+index]
+            hazardZone = self.stateForCoordination['Tracking']['HazardZone_'+str(index)]
             iNumOfDrones = len(hazardZone['tracking_drones'])
             if hazardZone['cycled'] : # 한바퀴 탐색이 끝났는 가
                 for _ in range(iNumOfDrones-1):
@@ -106,21 +111,25 @@ class State():
                             if oUavInfos['STATE'] == Enum.INITIAL_STATE and oUavInfos['STATE_DETAIL'][Enum.INITIAL_STATE]['start_recovery_id'] == iRecoveryId ]
             
             if len(aFreeDrones) != 0 :
-                dRecoveryArea = self.stateForCoordination['Searching']['RecoveryArea_'+iRecoveryId]
+                dRecoveryArea = self.stateForCoordination['Searching']['RecoveryArea_'+str(iRecoveryId)]
                 
                 # 섹션 단위로 계산
                 aProgs = np.array([len(dSection['searched'])/dSection['numberOfPoints']*100 for dSection in dRecoveryArea.values()])
                 # 도움이 필요한 섹션
                 aProgIsZero = np.where(aProgs[aProgs == 0])[0]
-                aProgIsLow = np.where(aProgs[aProgs > 0 and aProgs < threshold])[0]
+                aProgIsLow = np.where(aProgs[(aProgs > 0) * (aProgs < threshold)])[0]
 
                 # 아무도 탐지하지 않은 곳 부터 처리
+                print(" - Deal with Zero")
                 aFreeDrones = self.dealwithZero(dRecoveryArea ,aProgIsZero, aFreeDrones)
+                print(" - Done")
                 # 남은 드론 수가 없다면 그냥 종료
                 if len(aFreeDrones) == 0 :
                     continue
-                
+
+                print(" - Deal with Zero")
                 aFreeDrones = self.dealwithLow(dRecoveryArea, aProgIsLow, aFreeDrones)
+                print(" - Done")
                 # 남은 드론 수가 없다면 그냥 종료
                 if len(aFreeDrones) != 0 :
                     aFreeDronesForAll.append(aFreeDrones)
@@ -173,7 +182,7 @@ class State():
         aShortestDrone = []
 
         for iSectionId in aProgIsZero:
-            dSection = dRecoveryArea['Section_'+iSectionId]
+            dSection = dRecoveryArea['Section_'+str(iSectionId)]
             aShortestDrone = [sys.maxsize,-1]
 
             for iUavId in aFreeDrones:
@@ -203,22 +212,25 @@ class State():
     def dealwithLow(self, dRecoveryArea ,aProgIsLow, aFreeDrones):
         # 커버된 영역이 적은 걸 먼저 처리
         # 고로 정렬 필요
-        aProgIsLow = [(iSectionId, len(dRecoveryArea['Section_'+iSectionId]['searched'])/dRecoveryArea['Section_'+iSectionId]['numberOfPoints']*100) for iSectionId in aProgIsLow]
+        aProgIsLow = [(iSectionId, len(dRecoveryArea['Section_'+str(iSectionId)]['searched'])/dRecoveryArea['Section_'+str(iSectionId)]['numberOfPoints']*100) for iSectionId in aProgIsLow]
         aProgIsLow.sort(key=lambda x: x[1])
         aProgIsLow = list(map(lambda x: x[0], aProgIsLow))
 
         aShortestDrone = []
 
         for iSectionId in aProgIsLow:
-            dSection = dRecoveryArea['Section_'+iSectionId]
+            dSection = dRecoveryArea['Section_'+str(iSectionId)]
             aShortestDrone = [sys.maxsize,-1]
-
+            waitingForFreeDrone = []
             ### 기존에 있는 거중 남은 좌표의 개수가 가장 많은 거에서 나눠준다.
-            aRemainPoints = [(iUavId, aPoints) for iUavId, aPoints in dSection['waiting'].items()]
-            tNeedToHelp = max(aRemainPoints,key=lambda x: len(x[1]))
-            
-            dSection['waiting'][tNeedToHelp[0]], waitingForFreeDrone \
-                = tNeedToHelp[1][:int(len(tNeedToHelp[1]/2))], tNeedToHelp[1][int(len(tNeedToHelp[1]/2)):],
+            if len(dSection['searchingUavs']) == 0 :
+                waitingForFreeDrone = dSection['waiting']
+            else :
+                aRemainPoints = [(iUavId, aPoints) for iUavId, aPoints in dSection['waiting'].items()]
+                tNeedToHelp = max(aRemainPoints,key=lambda x: len(x[1]))
+                
+                dSection['waiting'][tNeedToHelp[0]], waitingForFreeDrone \
+                    = tNeedToHelp[1][:int(len(tNeedToHelp[1]/2))], tNeedToHelp[1][int(len(tNeedToHelp[1]/2)):],
 
             for iUavId in aFreeDrones:
 
@@ -449,15 +461,15 @@ class State():
         elif state == Enum.SEARCHING:
             # search for fire-zone and entity
             # update action_detail.
-            recoveryZone = self.stateForCoordination['Searching']['RecoveryArea_'+self.aliveUavList[uavId]['STATE_DETAIL'][Enum.INITIAL_STATE]['start_recovery_id']]
-            dSection = recoveryZone['Section'+self.aliveUavList[uavId]['STATE_DETAIL'][Enum.SEARCHING]['sectionId']]
+            recoveryZone = self.stateForCoordination['Searching']['RecoveryArea_'+str(self.aliveUavList[uavId]['STATE_DETAIL'][Enum.INITIAL_STATE]['start_recovery_id'])]
+            dSection = recoveryZone['Section_'+str(self.aliveUavList[uavId]['STATE_DETAIL'][Enum.SEARCHING]['sectionId'])]
 
             self.searching.updateSearchingState(self.aliveUavList[uavId], dSection)
 
         elif state == Enum.TRACKING:
             # tracking a fire-zone
             # still is tracking
-            hazardZone = self.stateForCoordination['Tracking']['HazardZone_'+self.aliveUavList[uavId]['STATE_DETAIL'][Enum.TRACKING]['tracking_zoneId']]
+            hazardZone = self.stateForCoordination['Tracking']['HazardZone_'+str(self.aliveUavList[uavId]['STATE_DETAIL'][Enum.TRACKING]['tracking_zoneId'])]
 
             self.tracking.updateTrackingState(self.aliveUavList[uavId], hazardZone)
         elif state == Enum.UNDERTAKED:
@@ -476,8 +488,8 @@ class State():
         uavInfos = self.aliveUavList[uavId]
 
         if uavInfos['STATE'] & Enum.SEARCHING:
-            recoveryZone = self.stateForCoordination['Searching']['RecoveryArea_'+self.aliveUavList[uavId]['STATE_DETAIL'][Enum.INITIAL_STATE]['start_recovery_id']]
-            dSection = recoveryZone['Section'+self.aliveUavList[uavId]['STATE_DETAIL'][Enum.SEARCHING]['sectionId']]
+            recoveryZone = self.stateForCoordination['Searching']['RecoveryArea_'+str(self.aliveUavList[uavId]['STATE_DETAIL'][Enum.INITIAL_STATE]['start_recovery_id'])]
+            dSection = recoveryZone['Section_'+str(self.aliveUavList[uavId]['STATE_DETAIL'][Enum.SEARCHING]['sectionId'])]
             
             if len(dSection['searchingUavs']) == 1:
                 dSection['waiting'] = dSection['waiting'][uavId]
@@ -492,10 +504,10 @@ class State():
                     dSection['waiting'][newId] = waitingList+dSection['waiting'][newId]
 
         elif uavInfos['STATE'] & Enum.TRACKING:
-            hazardZone = self.stateForCoordination['Tracking']['HazardZone_'+self.aliveUavList[uavId]['STATE_DETAIL'][Enum.TRACKING]['tracking_zoneId']]
+            hazardZone = self.stateForCoordination['Tracking']['HazardZone_'+str(self.aliveUavList[uavId]['STATE_DETAIL'][Enum.TRACKING]['tracking_zoneId'])]
             hazardZone['tracking_drones'].remove(uavId)
         elif uavInfos['STATE'] & Enum.UNDERTAKED:
-            hazardZone = self.stateForCoordination['Tracking']['HazardZone_'+self.aliveUavList[uavId]['STATE_DETAIL'][Enum.UNDERTAKED]['tracking_zoneId']]
+            hazardZone = self.stateForCoordination['Tracking']['HazardZone_'+str(self.aliveUavList[uavId]['STATE_DETAIL'][Enum.UNDERTAKED]['tracking_zoneId'])]
             hazardZone['tracking_drones'].remove(uavId)
 
     ### For initial_state 
@@ -591,7 +603,7 @@ class State():
                     if self.numOfDroneInSameZone(zoneId) < 2 :
                         # partner
                         # tracking with different direction
-                        self.stateForCoordination['Tracking']['HazardZone_'+zoneId]['tracking_drones'].append(entityId)
+                        self.stateForCoordination['Tracking']['HazardZone_'+str(zoneId)]['tracking_drones'].append(entityId)
                         uavInfos['STATE_DETAIL'][Enum.SEARCHING]['is_scanning'] = False
                         uavInfos['STATE'] = Enum.TRACKING
                         uavInfos['STATE_DETAIL'][Enum.TRACKING]['tracking_zoneID'] = zoneId
@@ -653,8 +665,8 @@ class State():
 
     ### For DetectedZone
     def getTrackingDirection(self, zoneId, detectedPoint):
-        aArea = self.stateForCoordination['Tracking']['HazardZone_'+zoneId]['area']
-        aStartPoint = self.stateForCoordination['Tracking']['HazardZone_'+zoneId]['startPoint']
+        aArea = self.stateForCoordination['Tracking']['HazardZone_'+str(zoneId)]['area']
+        aStartPoint = self.stateForCoordination['Tracking']['HazardZone_'+str(zoneId)]['startPoint']
 
         aDists = [(self.utils.distance(aStartPoint[1], aStartPoint[0], point.get_Longitude(), point.get_Latitude()),[point.get_Latitude(), point.get_Longitude()]) for point in aArea]
         aFarthestPoint = max(aDists, key=lambda x: x[0])[1]
@@ -670,7 +682,7 @@ class State():
         fShortestDist = sys.maxsize
         zoneId = 0
         for i in range(len(self.stateForCoordination['Tracking'])):
-            for point in self.stateForCoordination['Tracking']['HazardZone_'+i]['area']:
+            for point in self.stateForCoordination['Tracking']['HazardZone_'+str(i)]['area']:
                 fDist = self.utils.distance(point.get_Longitude(), point.get_Latitude(), detectedPoint.get_Longitude(), detectedPoint.get_Latitude()) 
                 if fDist < fShortestDist:
                     zoneId = i; fShortestDist = fDist
@@ -679,13 +691,13 @@ class State():
 
     def addNewDetectedZone(self, detectedPoint):
         zoneId = len(self.stateForCoordination['Tracking'])
-        self.stateForCoordination['Tracking']['HazardZone_'+zoneId] = {'tracking_drones':[], 'cycled' : False, 'area':[], 'startPoint': [detectedPoint.get_Latitude(), detectedPoint.get_Longitude()]}
-        self.stateForCoordination['Tracking']['HazardZone_'+zoneId]['area'].append(detectedPoint)
+        self.stateForCoordination['Tracking']['HazardZone_'+str(zoneId)] = {'tracking_drones':[], 'cycled' : False, 'area':[], 'startPoint': [detectedPoint.get_Latitude(), detectedPoint.get_Longitude()]}
+        self.stateForCoordination['Tracking']['HazardZone_'+str(zoneId)]['area'].append(detectedPoint)
         return zoneId
 
     def getDetectedZoneById(self, zoneId):
-        if 'HazardZone_'+zoneId in self.stateForCoordination['Tracking'].keys():
-            return self.stateForCoordination['Tracking']['HazardZone_'+zoneId]
+        if 'HazardZone_'+str(zoneId) in self.stateForCoordination['Tracking'].keys():
+            return self.stateForCoordination['Tracking']['HazardZone_'+str(zoneId)]
         return None
 
     def getDetectedZones(self):
@@ -694,29 +706,29 @@ class State():
     def getCenterPointInZone(self, zoneId):
         lat = 0
         lon = 0
-        lenth = len( self.stateForCoordination['Tracking']['HazardZone_'+zoneId]['area'])
-        for point in self.stateForCoordination['Tracking']['HazardZone_'+zoneId]['area'] :
+        lenth = len( self.stateForCoordination['Tracking']['HazardZone_'+str(zoneId)]['area'])
+        for point in self.stateForCoordination['Tracking']['HazardZone_'+str(zoneId)]['area'] :
             lat += point.get_Latitude()
             lon += point.get_Longitude()
         
         return [lat/lenth, lon/lenth]
     
     def numOfDroneInSameZone(self, zoneId):
-        return len(self.stateForCoordination['Tracking']['HazardZone_'+zoneId]['tracking_drones'])
+        return len(self.stateForCoordination['Tracking']['HazardZone_'+str(zoneId)]['tracking_drones'])
 
     def estimateDetectedZone(self):
         for i in len(self.stateForCoordination['Tracking']):
-            all_coords = [[coord.get_Latitude(), coord.get_Longitude()] for coord in self.stateForCoordination['HazardZone_'+i]['area']]
+            all_coords = [[coord.get_Latitude(), coord.get_Longitude()] for coord in self.stateForCoordination['HazardZone_'+str(i)]['area']]
             hull = ConvexHull(np.asarray(all_coords, dtype=np.float32))
             if len(all_coords) < 3:
                 print("Not that much to estimate")
                 return
-            self.stateForCoordination['HazardZone_'+i]['area'] = [self.stateForCoordination['HazardZone_'+i]['area'][i] for i in hull.vertices]
+            self.stateForCoordination['HazardZone_'+str(i)]['area'] = [self.stateForCoordination['HazardZone_'+str(i)]['area'][j] for j in hull.vertices]
 
             # Create polygon object
             estimatedHazardZone = Polygon()
 
-            for k in self.stateForCoordination['HazardZone_'+i]['area']:
+            for k in self.stateForCoordination['HazardZone_'+str(i)]['area']:
                 estimatedHazardZone.get_BoundaryPoints().append(k)
 
             self.utils.send_estimate_report(estimatedHazardZone, i)

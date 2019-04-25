@@ -473,7 +473,7 @@ class VoronoiSearch():
             in_keepinzone_points_list = []
 
             polygon = vertices[region]
-            ax1.fill(*zip(*polygon), alpha=0.4)
+            # ax1.fill(*zip(*polygon), alpha=0.4)
             # print("-------------")
             # print("  ",str(polygon_count),"  ")
             # print(vertices[region])
