@@ -2,6 +2,8 @@ import Drone
 import Utils
 import VoronoiForInitialSearch
 import Enum
+import StraightForInitialSearch
+
 import math
 class Searching():
 
@@ -33,13 +35,15 @@ class Searching():
         '''
         try:
             self.initialsearchpoints = VoronoiForInitialSearch.VoronoiSearch(pointlist, nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone, startway)
-            # print("DeBug...")
+            print("DeBug...")
             self.initialsearchpoints.voronoialgo()
             print("SEARCHCOORD\n", self.initialsearchpoints.searchcoord)
             print("SEARCHROUTE\n", self.initialsearchpoints.searchroute)
             self.waypointlists = self.returnwaypointlists()
         except:
             ### TODO : Implement the way to set waypoints without voronoi
+            self.initialsearchpoints = StraightForInitialSearch.StraightSearch(pointlist, nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone)
+            self.waypointlists = self.initialsearchpoints.straightalgo()
             print("CAN'T VORONOI!!")
     
     def setTrackingSection(self, searchMap):
