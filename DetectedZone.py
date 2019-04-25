@@ -32,7 +32,7 @@ class DetectedZone():
         zoneId = len(self.zones)
         self.zones[zoneId] = []
         self.zones[zoneId].append(detectedPoint)
-        return zoneId
+        return zoneId, self.zones[zoneId]
 
     def getDetectedZoneById(self, zoneId):
         if zoneId in self.zones.keys():

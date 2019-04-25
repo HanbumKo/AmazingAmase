@@ -16,7 +16,7 @@ class Charging():
                                 uavInfos['STATE_DETAIL'][Enum.INITIAL_STATE]['recovery_point'][1], uavInfos['STATE_DETAIL'][Enum.INITIAL_STATE]['recovery_point'][0])
         
         if fDist <= threshold :
-            uavInfos['STATE'] = uavInfos['STATE_DETAIL'][Enum.CHARGING]['previous_action']
+            uavInfos['STATE'] = Enum.INITIAL_STATE
         else : 
             uavInfos['NEXT_HEADING'] = self.utils.getHeadingToDest(uavInfos['OBJ'].getLatitude(), uavInfos['OBJ'].getLongitude(),
                                 uavInfos['STATE_DETAIL'][Enum.INITIAL_STATE]['recovery_point'][0], uavInfos['STATE_DETAIL'][Enum.INITIAL_STATE]['recovery_point'][1])

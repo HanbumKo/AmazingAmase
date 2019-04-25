@@ -11,7 +11,7 @@ class Tracking():
 
         pass
     
-    def updateTrackingState(self, uavInfos):
+    def updateTrackingState(self, uavInfos, hazardZone):
         # uavInfos = { 
         #   OBJ : <uav_object>
         #   STATE : <uav_state>
@@ -31,7 +31,8 @@ class Tracking():
             self.gointoZone(uavInfos)
         else : 
             # got lost
-            uavInfos['STATE'] = Enum.SEARCHING
+            uavInfos['STATE'] = Enum.INITIAL_STATE
+            hazardZone['tracking_drones'].remove(uavInfos['OBJ'].getID())
         
     def isStillTracking(self, uavInfos):
         # tracking condition : interval between current time and last_tracking_time
@@ -51,7 +52,7 @@ class Tracking():
             direction = uavInfos['STATE_DETAIL'][Enum.TRACKING]['tracking_direction']
 
             uavInfos['NEXT_HEADING'] = originalDirection+direction*(self.change)*(-1)
-            if azimuth > 45 or azimuth < -45 :
+            if azimuth > 60 or azimuth < -60 :
                 uavInfos['NEXT_AZIMUTH'] = azimuth + direction*(self.change)
 
     def gooutFromZone(self, uavInfos):
@@ -64,7 +65,7 @@ class Tracking():
 
         uavInfos['NEXT_HEADING'] =  originalDirection+direction*(self.change)
 
-        if azimuth < 45 and azimuth > -45:
+        if azimuth < 60 and azimuth > -60:
             uavInfos['NEXT_AZIMUTH'] = azimuth + direction*(self.change)*(-1)
             
 

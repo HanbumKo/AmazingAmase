@@ -69,17 +69,17 @@ class SampleHazardDetector(IDataReceived):
         if isinstance(lmcpObject, SessionStatus):
             scenarioTime = lmcpObject.get_ScenarioTime()
 
-        if self.isStepOne and (scenarioTime >= 1195000 and scenarioTime <= 1200000):
+        if self.isStepOne and (scenarioTime >= 1190000 and scenarioTime <= 1200000):
             self.drones.estimateDetectedZone()
 
             self.isStepOne = False
             self.isStepTwo = True
-        elif self.isStepTwo and (scenarioTime >= 2395000 and scenarioTime <= 2400000):
+        elif self.isStepTwo and (scenarioTime >= 2390000 and scenarioTime <= 2400000):
             self.drones.estimateDetectedZone()
 
             self.isStepTwo = False
             self.isStepThree = True
-        elif self.isStepThree and (scenarioTime >= 3595000 and scenarioTime <= 3600000):
+        elif self.isStepThree and (scenarioTime >= 3590000 and scenarioTime <= 3600000):
             self.drones.estimateDetectedZone()
 
             self.isStepThree = False
