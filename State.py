@@ -75,8 +75,12 @@ class State():
 
     def checkTotalState(self, uavId):
         if max(list(self.aliveUavList.keys())) == uavId :
+            print(" - Check tracking state")
             self.checkTrackingState()
+            print(" - Done")
+            print(" - Check searching state")
             self.checkSearchingState()
+            print(" - Done")
     
     def checkTrackingState(self):
         iNumOfHZ = len(self.stateForCoordination['Tracking'])
@@ -113,15 +117,19 @@ class State():
                 aProgs = np.array([len(dSection['searched'])/dSection['numberOfPoints']*100 for dSection in dRecoveryArea.values()])
                 # 도움이 필요한 섹션
                 aProgIsZero = np.where(aProgs[aProgs == 0])[0]
-                aProgIsLow = np.where(aProgs[aProgs > 0 and aProgs < threshold])[0]
+                aProgIsLow = np.where(aProgs[(aProgs > 0) * (aProgs < threshold)])[0]
 
                 # 아무도 탐지하지 않은 곳 부터 처리
+                print(" - Deal with Zero")
                 aFreeDrones = self.dealwithZero(dRecoveryArea ,aProgIsZero, aFreeDrones)
+                print(" - Done")
                 # 남은 드론 수가 없다면 그냥 종료
                 if len(aFreeDrones) == 0 :
                     continue
-                
+
+                print(" - Deal with Zero")
                 aFreeDrones = self.dealwithLow(dRecoveryArea, aProgIsLow, aFreeDrones)
+                print(" - Done")
                 # 남은 드론 수가 없다면 그냥 종료
                 if len(aFreeDrones) != 0 :
                     aFreeDronesForAll.append(aFreeDrones)
