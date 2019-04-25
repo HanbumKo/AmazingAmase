@@ -289,11 +289,43 @@ class VoronoiSearch():
 
         return r1
 
-    def infotriangles(self, adjusted_polygon_points, trilist):
+    def sortshortdistance(self, threepoints, recoverypoint):
+        dis = [0,0,0]
+        temp = []
+        for i in range(len(threepoints)):
+            dis[i] = self.caldistancebetweentwopoint(threepoints[i], recoverypoint)
+        dis = np.array(dis)
+        for i in range(3):
+            temp.append(threepoints[np.argmin(dis)])
+            dis[np.argmin(dis)] = sys.maxsize
 
+        return temp
+
+    def returnpointsintriangle(self, trianglepointslist, centerpoint, recoveryzone):
+        # print(trianglepointslist)
+        # print(centerpoint)
+        # print(recoveryzone)
+        temp = []
+        returntemp = []
+        for i in range(len(trianglepointslist)):
+            temp.append([((trianglepointslist[i][0] - centerpoint[0]) * 2 / 3) + centerpoint[0], ((trianglepointslist[i][1] - centerpoint[1]) * 2 / 3 ) + centerpoint[1]])
+        # print("1\n",temp)
+        returntemp = returntemp+self.sortshortdistance(temp, recoveryzone)
+
+        temp = []
+        for i in range(len(trianglepointslist)):
+            temp.append([((trianglepointslist[i][0] - centerpoint[0]) / 3) + centerpoint[0], ((trianglepointslist[i][1] - centerpoint[1]) / 3) + centerpoint[1]])
+        # print("2\n",temp)
+        returntemp = returntemp + self.sortshortdistance(temp, recoveryzone)
+
+        # print("returnpointsintriangle",returntemp)
+        return returntemp
+
+    def infotriangles(self, adjusted_polygon_points, trilist, recoverypoint):
         coordlist = []
         degreelist = []
         arealist = []
+        oneofarea = []
         for i in range(len(trilist.simplices)):
             x = 0
             y = 0
@@ -305,9 +337,12 @@ class VoronoiSearch():
             x /= 3
             y /= 3
             coordlist.append([x,y])
+            # print("temp\n",temp)
+            # print(x,y)
             arealist.append(self.areasize(temp))
-
-        return coordlist, arealist
+            oneofarea.append(self.returnpointsintriangle(temp, [x,y], recoverypoint))
+        # print("oneofarea\n",oneofarea)
+        return coordlist, arealist, oneofarea
 
     def calcdistancecenterandrecovery(self, coordlist, recoveryzone):
         distance = []
@@ -429,6 +464,7 @@ class VoronoiSearch():
         largepointslist_idx = []
         smallpointslist_idx = []
         totalpoints = []
+        waypointlist = []
 
         for region in regions:
 
@@ -487,14 +523,15 @@ class VoronoiSearch():
             trilist = Delaunay(adjusted_polygon_points_coord)
 
             #coordlist, arealist, degreelist = self.infotriangles(adjusted_polygon_points_coord, trilist)
-            coordlist, arealist = self.infotriangles(adjusted_polygon_points_coord, trilist)
+            coordlist, arealist, oneofarea = self.infotriangles(adjusted_polygon_points_coord, trilist, self.points[polygon_count+4])
 
             # print("adjust\n",adjusted_polygon_points_coord)
             # print("trilist.simplices.copy()\n",trilist.simplices)
             # print("arealist\n",arealist)
+            # print("coordlist\n",coordlist)
 
             totalpoints.append(coordlist)
-
+            waypointlist.append(oneofarea)
 
             '''
             NEAR POINTS
@@ -567,19 +604,24 @@ class VoronoiSearch():
 
 
 
-            ax4.triplot(adjusted_polygon_points_coord[:, 1], adjusted_polygon_points_coord[:, 0],
-                        trilist.simplices.copy())
-            ax4.plot(coordlist[:, 1], coordlist[:, 0], 'o')
-
-            for ttt in range(len(trilist.simplices)):
-                ax4.text(coordlist[ttt][1], coordlist[ttt][0] + polygon_count * 0.01,
-                         '{}\n{}'.format(ttt, round(arealist[ttt], 3)), fontsize=6)
+            # ax4.triplot(adjusted_polygon_points_coord[:, 1], adjusted_polygon_points_coord[:, 0],trilist.simplices.copy())
+            # ax4.plot(coordlist[:, 1], coordlist[:, 0], 'o')
+            #
+            # for ttt in range(len(trilist.simplices)):
+            #     ax4.text(coordlist[ttt][1], coordlist[ttt][0] + polygon_count * 0.01,
+            #              '{}\n{}'.format(ttt, round(arealist[ttt], 3)), fontsize=6)
             polygon_count += 1
             region_count = 0
 
-
-
-        '''
+        print("waypoints!!!\n",waypointlist)
+        waypointlist = np.array(waypointlist)
+        for i in range(len(waypointlist)):
+            waypointlist[i] = np.array(waypointlist[i])
+            for j in range(len(waypointlist[i])):
+                ax4.plot(waypointlist[i][j][:, 0], waypointlist[i][j][:, 1],'v')
+                for k in range(len(waypointlist[i][j])):
+                    ax4.text(waypointlist[i][j][k][0],waypointlist[i][j][k][1],'{}'.format(k),fontsize=6)
+        ''',
         set order of points
         '''
         distancelist = []
@@ -677,9 +719,9 @@ if __name__ == '__main__':
 
 
 
-    # pointlist[4] = [39.9258, -121.2517]
-    # pointlist[5] = [39.9919, -120.8328]
-    # pointlist[6] = [39.5894, -121.0448]
+    pointlist[4] = [39.9258, -121.2517]
+    pointlist[5] = [39.9919, -120.8328]
+    pointlist[6] = [39.5894, -121.0448]
     # pointlist[7] = [39.7181, -121.254]
     # pointlist[8] = [39.8012, -121.1]
     # pointlist[9] = [39.8094, -120.828]
@@ -688,9 +730,9 @@ if __name__ == '__main__':
     # [39.89002837171417, -121.37997270775406],
     # [39.74826691717287, -120.71877896871565]]
 
-    pointlist[4] = [39.67373735542855, -121.09310442995925]
-    pointlist[5] = [39.89002837171417, -121.37997270775406]
-    pointlist[6] = [39.74826691717287, -120.71877896871565]
+    # pointlist[4] = [39.67373735542855, -121.09310442995925]
+    # pointlist[5] = [39.89002837171417, -121.37997270775406]
+    # pointlist[6] = [39.74826691717287, -120.71877896871565]
 
 
     pointlist = np.array(pointlist)

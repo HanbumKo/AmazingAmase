@@ -375,6 +375,11 @@ class StraightSearch():
                 test.append(np.array(np.array(box_of_list[i][0])+np.array(box_of_list[i][1])+np.array([keep_top_left[0] + interval_box * (i+1), keep_top_left[1]])+np.array([keep_top_left[0] + interval_box * (i+1), keep_bottom_right[1]])) / 4)
 
                 for j in range(self.number_drone_each_recoveryzone):
+                    # drone_start_position[i][j].append([box_of_list[i][0][0] + drone_interval, box_of_list[i][0][1] - (drone_interval*6*j)- drone_interval])
+                    # drone_start_position[i][j].append([box_of_list[i][1][0] - drone_interval, box_of_list[i][1][1] - (drone_interval*6*j)- drone_interval])
+                    # drone_start_position[i][j].append([box_of_list[i][1][0] - drone_interval, box_of_list[i][1][1] - (drone_interval*6*j)- drone_interval*5])
+                    # drone_start_position[i][j].append([box_of_list[i][0][0] + drone_interval, box_of_list[i][0][1] - (drone_interval*6*j)- drone_interval*5])
+
                     drone_start_position[i][j].append([box_of_list[i][0][0] + (drone_interval * 6 * j) + drone_interval, box_of_list[i][0][1] - drone_interval])
                     drone_start_position[i][j].append([box_of_list[i][1][0] + (drone_interval * 6 * j) + drone_interval, box_of_list[i][1][1] + drone_interval])
                     drone_start_position[i][j].append([box_of_list[i][1][0] + (drone_interval * 6 * j) + drone_interval*5, box_of_list[i][1][1] + drone_interval])
@@ -402,9 +407,11 @@ class StraightSearch():
             ax3.plot(box_of_list[i][:, 0], box_of_list[i][:, 1], 'ko')
             for j in range(len(drone_start_position[i])):
                 ax3.plot(drone_start_position[i][j][:, 0], drone_start_position[i][j][:, 1], 'v')
+        # print(box_of_list)
+        # print(drone_start_position)
 
 
-        plt.show()
+        #plt.show()
         return drone_start_position
 
 '''
