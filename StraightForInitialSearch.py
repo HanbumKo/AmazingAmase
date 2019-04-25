@@ -395,7 +395,7 @@ class StraightSearch():
             ax1.text(test[i][0],test[i][1],'{}'.format(i))
 
         box_of_list = np.array(box_of_list)
-        drone_start_position = np.array(drone_start_position)
+        # drone_start_position = np.array(drone_start_position)
         # print("box_of_list\n", box_of_list)
         # print("drone_start_position\n",drone_start_position)
         for i in range(len(box_of_list)):
@@ -403,10 +403,10 @@ class StraightSearch():
 
         ax3.plot(self.points[:, 0], self.points[:, 1], 'o')
 
-        for i in range(len(box_of_list)):
-            ax3.plot(box_of_list[i][:, 0], box_of_list[i][:, 1], 'ko')
-            for j in range(len(drone_start_position[i])):
-                ax3.plot(drone_start_position[i][j][:, 0], drone_start_position[i][j][:, 1], 'v')
+        # for i in range(len(box_of_list)):
+        #     ax3.plot(box_of_list[i][:, 0], box_of_list[i][:, 1], 'ko')
+        #     for j in range(len(drone_start_position[i])):
+        #         ax3.plot(drone_start_position[i][j][:, 0], drone_start_position[i][j][:, 1], 'v')
         # print(box_of_list)
         # print(drone_start_position)
 
