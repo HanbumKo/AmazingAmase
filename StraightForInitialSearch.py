@@ -290,8 +290,8 @@ class StraightSearch():
         total_dx = 0
         total_dy = 0
         recoveryzone = self.points[4:]
-        print(self.points)
-        print(recoveryzone)
+        # print(self.points)
+        # print(recoveryzone)
         for i in range(len(recoveryzone)):
             dx = recoveryzone[i][0] - recoveryzone[(i + 1) % len(recoveryzone)][0]
             dy = recoveryzone[i][1] - recoveryzone[(i + 1) % len(recoveryzone)][1]
@@ -345,12 +345,12 @@ class StraightSearch():
 
         drone_start_position = [[[] for _ in range(self.number_drone_each_recoveryzone)] for _ in range(self.number_recoveryzone)]
         box_of_list = [[] for _ in range(self.number_recoveryzone)]
-        print(drone_start_position)
+        # print(drone_start_position)
         test = []
         # latitude차이가 적어서 longtitude로 나눔
         interval_box = self.__height / self.number_recoveryzone
         drone_interval = interval_box / (6 * self.number_drone_each_recoveryzone)
-        print(interval_box)
+        # print(interval_box)
 
         if way:
 
@@ -396,8 +396,8 @@ class StraightSearch():
 
         box_of_list = np.array(box_of_list)
         drone_start_position = np.array(drone_start_position)
-        print("box_of_list\n", box_of_list)
-        print("drone_start_position\n",drone_start_position)
+        # print("box_of_list\n", box_of_list)
+        # print("drone_start_position\n",drone_start_position)
         for i in range(len(box_of_list)):
             ax2.plot(box_of_list[i][:, 0], box_of_list[i][:, 1], 'v')
 

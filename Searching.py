@@ -3,7 +3,7 @@ import Utils
 import VoronoiForInitialSearch
 import Enum
 import StraightForInitialSearch
-
+import numpy as np
 import math
 class Searching():
 
@@ -19,6 +19,7 @@ class Searching():
         nkeepinzone = len(keepinzone)
         nrecoveryzone = len(recoveryzone)
         numberofdroneeachrecoveryzone = NumberofDrones / nrecoveryzone
+        print("numberofdroneeachrecoveryzone",int(numberofdroneeachrecoveryzone))
         pointlist = [[] for _ in range(nkeepinzone + nrecoveryzone)]
 
         for i in range(nkeepinzone):
@@ -34,18 +35,19 @@ class Searching():
         3 = largest
         '''
         try:
-            self.initialsearchpoints = VoronoiForInitialSearch.VoronoiSearch(pointlist, nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone, startway)
-            print("DeBug...")
-            self.initialsearchpoints.voronoialgo()
-            print("SEARCHCOORD\n", self.initialsearchpoints.searchcoord)
-            print("SEARCHROUTE\n", self.initialsearchpoints.searchroute)
-            self.waypointlists = self.returnwaypointlists()
+            self.initialsearchpoints = VoronoiForInitialSearch.VoronoiSearch(np.array(pointlist), nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone, startway)
+            print("voronoi...")
+            self.waypointlists = self.initialsearchpoints.voronoialgo()
+            print("done")
+            # print("SEARCHCOORD\n", self.initialsearchpoints.searchcoord)
+            # print("SEARCHROUTE\n", self.initialsearchpoints.searchroute)
         except:
-            ### TODO : Implement the way to set waypoints without voronoi
-            self.initialsearchpoints = StraightForInitialSearch.StraightSearch(pointlist, nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone)
+            print("straight...")
+            print(pointlist)
+            self.initialsearchpoints = StraightForInitialSearch.StraightSearch(np.array(pointlist), nkeepinzone, nrecoveryzone, int(numberofdroneeachrecoveryzone))
             self.waypointlists = self.initialsearchpoints.straightalgo()
-            print("CAN'T VORONOI!!")
-    
+            print("done")
+        print(self.waypointlists)
     def setTrackingSection(self, searchMap):
         pass
     
