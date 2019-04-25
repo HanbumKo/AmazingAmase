@@ -1,6 +1,7 @@
 import Drone
 import Utils
 import VoronoiForInitialSearch
+import StraightForInitialSearch
 
 import math
 class Searching():
@@ -40,6 +41,8 @@ class Searching():
             self.waypointlists = self.returnwaypointlists()
         except:
             ### TODO : Implement the way to set waypoints without voronoi
+            self.initialsearchpoints = StraightForInitialSearch.StraightSearch(pointlist, nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone)
+            self.waypointlists = self.initialsearchpoints.straightalgo()
             print("CAN'T VORONOI!!")
     def returnwaypointlists(self):
         waypointlist = []
