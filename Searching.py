@@ -3,7 +3,6 @@ import Utils
 import VoronoiForInitialSearch
 import Enum
 import StraightForInitialSearch
-
 import numpy as np
 import math
 class Searching():
@@ -36,31 +35,21 @@ class Searching():
         3 = largest
         '''
         try:
-            print("voronoi...")
             self.initialsearchpoints = VoronoiForInitialSearch.VoronoiSearch(np.array(pointlist), nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone, startway)
+            print("voronoi...")
             self.waypointlists = self.initialsearchpoints.voronoialgo()
-            print("done")    
+            print("done")
+            # print("SEARCHCOORD\n", self.initialsearchpoints.searchcoord)
+            # print("SEARCHROUTE\n", self.initialsearchpoints.searchroute)
         except:
             print("straight...")
+            # print(pointlist)
             self.initialsearchpoints = StraightForInitialSearch.StraightSearch(np.array(pointlist), nkeepinzone, nrecoveryzone, int(numberofdroneeachrecoveryzone))
-            self.waypointlists = self.initialsearchpoints.voronoialgo()
+            self.waypointlists = self.initialsearchpoints.straightalgo()
             print("done")
         print(self.waypointlists)
     def setTrackingSection(self, searchMap):
-        print(self.waypointlists)
-        for i in range(len(self.waypointlists)):
-            print(" - RecoveryArea_"+str(i)+"setting")
-            searchMap['RecoveryArea_'+str(i)] = {}
-            
-            for j in range(len(self.waypointlists[i])):
-                searchMap['RecoveryArea_'+str(i)]['Section_'+str(j)] = {
-                    'waiting' : self.waypointlists[i][j],
-                    'searched' : [],
-                    'numberOfPoints' : len(self.waypointlists[i][j]),
-                    'searchingUavs' : []
-                }
-            print(" - Done")
-        print(searchMap)
+        pass
     
     def returnwaypointlists(self):
         waypointlist = []
