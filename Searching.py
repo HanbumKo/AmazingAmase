@@ -4,6 +4,7 @@ import VoronoiForInitialSearch
 import Enum
 import StraightForInitialSearch
 
+import numpy as np
 import math
 class Searching():
 
@@ -34,20 +35,30 @@ class Searching():
         3 = largest
         '''
         try:
-            self.initialsearchpoints = VoronoiForInitialSearch.VoronoiSearch(pointlist, nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone, startway)
+            self.initialsearchpoints = VoronoiForInitialSearch.VoronoiSearch(np.array(pointlist), nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone, startway)
             print("DeBug...")
-            self.initialsearchpoints.voronoialgo()
-            print("SEARCHCOORD\n", self.initialsearchpoints.searchcoord)
-            print("SEARCHROUTE\n", self.initialsearchpoints.searchroute)
-            self.waypointlists = self.returnwaypointlists()
+            self.waypointlists = self.initialsearchpoints.voronoialgo()
         except:
             ### TODO : Implement the way to set waypoints without voronoi
-            self.initialsearchpoints = StraightForInitialSearch.StraightSearch(pointlist, nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone)
+            self.initialsearchpoints = StraightForInitialSearch.StraightSearch(np.array(pointlist), nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone)
             self.waypointlists = self.initialsearchpoints.straightalgo()
             print("CAN'T VORONOI!!")
     
     def setTrackingSection(self, searchMap):
-        pass
+        print(self.waypointlists)
+        for i in range(len(self.waypointlists)):
+            print(" - RecoveryArea_"+str(i)+"setting")
+            searchMap['RecoveryArea_'+str(i)] = {}
+            
+            for j in range(len(self.waypointlists[i])):
+                searchMap['RecoveryArea_'+str(i)]['Section_'+str(j)] = {
+                    'waiting' : self.waypointlists[i][j],
+                    'searched' : [],
+                    'numberOfPoints' : len(self.waypointlists[i][j]),
+                    'searchingUavs' : []
+                }
+            print(" - Done")
+        print(searchMap)
     
     def returnwaypointlists(self):
         waypointlist = []
