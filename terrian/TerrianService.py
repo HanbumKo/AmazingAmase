@@ -95,7 +95,6 @@ class TerrianService(object):
         return tile.getElevation(lat, lon) if tile is not None else 0
 
     def getElevations(self, ullat, ullon, lrlat, lrlon, arcStep):
-        tmp = 0
         
         if ullat < lrlat:
             ullat, lrlat = lrlat, ullat
@@ -108,7 +107,9 @@ class TerrianService(object):
         numlons = int((lrlon - ullon) / arcStep)
         numlons = 1 if numlons == 0 else numlons
         ptsPerDegree = int(1.0/arcStep)
+
         posts = [ [ 0 for i in range(numlats)] for j in range(numlons)]
+
         xs = 0
         xe = 0
         ys = 0
@@ -177,7 +178,7 @@ class TerrianService(object):
         if (slopeRad >= 0.0 or maxDist <= 0.0) :
             maxDist = self.distanceToHorizon(startAlt)
 
-        maxDist = math.min(maxDist, math.abs(startAlt / tanSlope))
+        maxDist = min(maxDist, abs(startAlt / tanSlope))
         ll = self.getLatLon(startLat, startLon, maxDist, heading);
         lat2 = math.degrees(ll[0])
         lon2 = math.degrees(ll[1])

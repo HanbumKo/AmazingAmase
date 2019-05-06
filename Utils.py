@@ -67,11 +67,81 @@ class Utils():
         return self.terrian_service.getElevation(lat,lon)
 
     def getElevations(self, ullat, ullon, lrlat, lrlon, arcStep):
-        self.terrian_service.getElevations(ullat, ullon, lrlat, lrlon, arcStep)
+        return self.terrian_service.getElevations(ullat, ullon, lrlat, lrlon, arcStep)
+
+    def getLineElevs(self, lat1, lon1, lat2, lon2):
+        return self.terrian_service.getLineElevs( lat1, lon1, lat2, lon2, 2)
 
     def getTheta(self, altitude, maxRange):
         return -(math.degrees(math.asin(altitude/maxRange))) - 5
     
+    def getOriginalDirection(self, uavInfos):
+        heading = uavInfos['OBJ'].getHeading()
+        course = uavInfos['OBJ'].getCourse()
+        originalDirection = 0
+
+        if heading < 0 :
+            heading += 360 
+
+        if course < 0 :
+            course += 360 
+        
+        gap =  abs((heading-course)/2)
+        
+        if gap > 90 :
+            gap = 180 - gap
+        
+        if heading > course:
+            originalDirection = course + gap
+        elif heading < course :
+            originalDirection = course - gap
+        else :
+            originalDirection = course
+
+        return originalDirection, gap
+
+    def getIdealSpeed(self, uavInfos) :
+        fAS = uavInfos['OBJ'].getAirspeed()
+        fGS = uavInfos['OBJ'].getGroundspeed()
+            
+        
+        if uavInfos['STATE'] & (Enum.TRACING|Enum.APPROACHING|Enum.TURNING2):
+            # Groundspeed -> 15
+            return 15 + ( fAS - fGS )
+        return 25 + ( fAS - fGS )
+
+    def turningForChangingAlt(self, altitude, uavInfos ) :
+
+        mission_command = MissionCommand()
+        mission_command.set_FirstWaypoint(1)
+        mission_command.set_VehicleID(uavInfos['OBJ'].getID())
+        mission_command.set_Status(CommandStatusType.Pending)
+        mission_command.set_CommandID(1)
+
+        way_point_list = mission_command.get_WaypointList()
+
+        way_point = Waypoint()
+        way_point.set_Latitude(uavInfos['OBJ'].getLatitude())
+        way_point.set_Longitude(uavInfos['OBJ'].getLongitude())
+        way_point.set_Speed(15)
+        way_point.set_Altitude(altitude)
+        way_point.set_AltitudeType(AltitudeType.MSL)
+        way_point.set_Number(1)
+        way_point.set_NextWaypoint(2)
+        way_point.set_SpeedType(SpeedType.Airspeed)
+        way_point.set_ClimbRate(0)
+        way_point.set_TurnType(TurnType.TurnShort)
+        way_point.set_ContingencyWaypointA(0)
+        way_point.set_ContingencyWaypointB(0)
+
+        way_point_list.append(way_point)
+
+        self.__client.sendLMCPObject(mission_command)
+
+        uavInfos['STATE_DETAIL'][Enum.TURNING2]['altitude'] = altitude
+        uavInfos['STATE_DETAIL'][Enum.TURNING2]['prev_state'] = uavInfos['STATE']
+        uavInfos['STATE'] = Enum.TURNING2
+
     def go_way_points(self, id, iStartIdx, aPoints, Speed=15, ClimbRate=0):
         mission_command = MissionCommand()
         mission_command.set_FirstWaypoint(1)
@@ -81,15 +151,13 @@ class Utils():
 
         way_point_list = mission_command.get_WaypointList()
 
-        idx = iStartIdx
-
         for i in range(len(aPoints)):
             
-            alti = self.terrian_service.getElevation(aPoints[idx][0], aPoints[idx][1])
+            alti = self.terrian_service.getElevation(aPoints[i][0], aPoints[i][1])
 
             way_point = Waypoint()
-            way_point.set_Latitude(aPoints[idx][0])
-            way_point.set_Longitude(aPoints[idx][1])
+            way_point.set_Latitude(aPoints[i][0])
+            way_point.set_Longitude(aPoints[i][1])
             way_point.set_Speed(Speed)
             way_point.set_Altitude(alti)
             way_point.set_AltitudeType(AltitudeType.MSL)
@@ -101,8 +169,6 @@ class Utils():
             way_point.set_ContingencyWaypointA(0)
             way_point.set_ContingencyWaypointB(0)
             way_point_list.append(way_point)
-
-            idx = (idx+1)%len(aPoints)
 
         self.__client.sendLMCPObject(mission_command)
 
@@ -143,7 +209,7 @@ class Utils():
         # Sending the Vehicle Action Command message to AMASE to be interpreted
         self.__client.sendLMCPObject(hazard_estimate_report)
 
-    def sendHeadingAndAltitudeCmd(self, uav_id, heading, altitude):
+    def sendHeadingAndAltitudeCmd(self, uav_id, heading, altitude, speed):
         vehicleActionCommand = VehicleActionCommand()
         vehicleActionCommand.set_VehicleID(uav_id)
         vehicleActionCommand.set_Status(CommandStatusType.Pending)
@@ -152,6 +218,7 @@ class Utils():
         flight = FlightDirectorAction()
         flight.set_Heading(heading)
         flight.set_Altitude(altitude)
+        flight.set_Speed(speed)
         vehicleActionCommand.get_VehicleActionList().append(flight)
 
         self.__client.sendLMCPObject(vehicleActionCommand)
@@ -173,6 +240,7 @@ class Utils():
         self.__client.sendLMCPObject(vehicle_action_command)
 
     def sendGimbalAzimuthAndElevationScanCmd(self, uav_id, StartAzimuth=0, EndAzimuth=0, AzimuthSlewRate=0, StartElevation=-50, EndElevation=-50, ElevationSlewRate=5, cycles=0):
+
 
         vehicle_action_command = VehicleActionCommand()
         vehicle_action_command.set_VehicleID(uav_id)
@@ -197,3 +265,35 @@ class Utils():
 
         # Sending the Vehicle Action Command message to AMASE to be interpreted
         self.__client.sendLMCPObject(vehicle_action_command)
+
+    def sendWaypointsCmd(self, uavId, start_lat, start_lon, end_lat, end_lon, speed) :
+        iHeightForSmokeDetect = 1500
+        iHeightForFireDetect = 200
+        mission_command = MissionCommand()
+        mission_command.set_FirstWaypoint(1)
+        mission_command.set_VehicleID(uavId)
+        mission_command.set_Status(CommandStatusType.Pending)
+        mission_command.set_CommandID(1)
+
+        way_point_list = mission_command.get_WaypointList()
+        
+        aElevs, aCoords = self.getLineElevs(start_lat, start_lon, end_lat, end_lon)
+
+        for i in range(len(aCoords)):
+            way_point = Waypoint()
+            way_point.set_Latitude(aCoords[i][0])
+            way_point.set_Longitude(aCoords[i][1])
+            way_point.set_Speed(speed)
+            way_point.set_Altitude(aElevs[i]+ iHeightForFireDetect)
+            way_point.set_AltitudeType(AltitudeType.MSL)
+            way_point.set_Number(i+1)
+            way_point.set_NextWaypoint(i+2)
+            way_point.set_SpeedType(SpeedType.Airspeed)
+            way_point.set_ClimbRate(0)
+            way_point.set_TurnType(TurnType.TurnShort)
+            way_point.set_ContingencyWaypointA(0)
+            way_point.set_ContingencyWaypointB(0)
+
+            way_point_list.append(way_point)
+
+        self.__client.sendLMCPObject(mission_command)

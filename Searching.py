@@ -45,11 +45,25 @@ class Searching():
             print("straight...")
             # print(pointlist)
             self.initialsearchpoints = StraightForInitialSearch.StraightSearch(np.array(pointlist), nkeepinzone, nrecoveryzone, int(numberofdroneeachrecoveryzone))
-            self.waypointlists = self.initialsearchpoints.straightalgo()
+            self.waypointlists = self.initialsearchpoints.straightalgo().tolist()
+
             print("done")
-        print(self.waypointlists)
+
     def setTrackingSection(self, searchMap):
-        pass
+        for i in range(len(self.waypointlists)):
+            print(" - RecoveryArea_"+str(i)+"setting")
+            searchMap['RecoveryArea_'+str(i)] = {}
+            
+            for j in range(len(self.waypointlists[i])):
+                searchMap['RecoveryArea_'+str(i)]['Section_'+str(j)] = {
+                    'waiting' : self.waypointlists[i][j],
+                    'searched' : [],
+                    'numberOfPoints' : len(self.waypointlists[i][j]),
+                    'searchingUavs' : []
+                }
+            print(" - Done")
+        print(searchMap)
+
     
     def returnwaypointlists(self):
         waypointlist = []
@@ -84,10 +98,15 @@ class Searching():
         if self.checkWhetherSearched(uavInfos, dSection):
             self.movetoNextPoint(uavInfos, dSection)
         else : 
-            self.updateNextHeading(uavInfos, dSection)
+            uavInfos['NEXT_AZIMUTH'] = {'start': -45, 'end': 45, 'rate': 45}
+            pass
+            # self.updateNextHeading(uavInfos, dSection)
 
     def checkWhetherSearched(self, uavInfos, dSection):
-        current_seacrh_point_loc = dSection['waiting'][uavInfos.getID()][0]
+        #print("here ? ")
+        #print(dSection['waiting'])
+
+        current_seacrh_point_loc = dSection['waiting'][uavInfos['OBJ'].getID()][0]
 
         uav_lat = uavInfos['OBJ'].getLatitude()
         uav_lon = uavInfos['OBJ'].getLongitude()
@@ -95,24 +114,27 @@ class Searching():
         return self.utils.distance(uav_lon, uav_lat, current_seacrh_point_loc[1], current_seacrh_point_loc[0]) <= self.threshold
         
     def movetoNextPoint(self, uavInfos, dSection):
+        
         uavId = uavInfos['OBJ'].getID()
-        current_seacrh_point_loc = dSection['waiting'][uavInfos.getID()].pop(0)
+        current_seacrh_point_loc = dSection['waiting'][uavId].pop(0)
         dSection['searched'].append(current_seacrh_point_loc)
 
-        if len(dSection['waiting'][uavInfos.getID()]) != 0:
+        if len(dSection['waiting'][uavId]) != 0:
                 
-            next_seacrh_point_loc = dSection['waiting'][uavInfos.getID()][0]
+            next_seacrh_point_loc = dSection['waiting'][uavId][0]
 
             uav_lat = uavInfos['OBJ'].getLatitude()
             uav_lon = uavInfos['OBJ'].getLongitude()
 
-            heading = self.utils.getHeadingToDest(uav_lat, uav_lon, next_seacrh_point_loc[0], next_seacrh_point_loc[1])
+            self.utils.sendWaypointsCmd(uavId, uav_lat, uav_lon, next_seacrh_point_loc[0], next_seacrh_point_loc[1], self.utils.getIdealSpeed(uavInfos))
 
-            print("next heading will be ", heading)
+            # heading = self.utils.getHeadingToDest(uav_lat, uav_lon, next_seacrh_point_loc[0], next_seacrh_point_loc[1])
 
-            # need to fix the direction
-            uavInfos['NEXT_HEADING'] = heading
-            uavInfos['NEXT_AZIMUTH'] = {'start': -45, 'end': 45, 'rate': 45}
+            # print("next heading will be ", heading)
+
+            # # need to fix the direction
+            # uavInfos['NEXT_HEADING'] = heading
+            # uavInfos['NEXT_AZIMUTH'] = {'start': -45, 'end': 45, 'rate': 45}
         else :            
             if len(dSection['searchingUavs']) == 1:
                 dSection['waiting'] = dSection['waiting'][uavId]
@@ -120,15 +142,17 @@ class Searching():
                 idx = dSection['searchingUavs'].index(uavId)
                 waitingList = dSection['waiting'].pop(uavId)
                 if idx != 0:
-                    newId = dSection['seachingUavs'][idx-1]
+                    newId = dSection['searchingUavs'][idx-1]
                     dSection['waiting'][newId]+=waitingList
                 else :
-                    newId = dSection['seachingUavs'][idx+1]
+                    newId = dSection['searchingUavs'][idx+1]
                     dSection['waiting'][newId] = waitingList+dSection['waiting'][newId]
             uavInfos['STATE'] = Enum.INITIAL_STATE
+            dSection['searchingUavs'].remove(uavId)
 
-    def updateNextHeading(self, uavInfos, dSection):        
-        current_seacrh_point_loc = dSection['waiting'][uavInfos.getID()][0]
+
+    def updateNextHeading(self, uavInfos, dSection) :       
+        current_seacrh_point_loc = dSection['waiting'][uavInfos['OBJ'].getID()][0]
 
         uav_lat = uavInfos['OBJ'].getLatitude()
         uav_lon = uavInfos['OBJ'].getLongitude()

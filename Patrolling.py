@@ -3,15 +3,14 @@ import Utils
 import Enum
 import math
 
-class Tracking():
+class Patrolling():
 
     def __init__(self, utils):
         self.utils = utils
-        self.change = 5
 
         pass
     
-    def updateTrackingState(self, uavInfos, hazardZone):
+    def updatePatrollingState(self, uavInfos, smokeZone):
         # uavInfos = { 
         #   OBJ : <uav_object>
         #   STATE : <uav_state>
@@ -26,48 +25,41 @@ class Tracking():
         #   next_heading : 0,
         #   msg : 0
         # }
-        if self.isStillTracking(uavInfos):
+        if self.isStillPatrolling(uavInfos):
             #Still tracking
-            self.gointoZone(uavInfos)
+            self.turnRightAngle(uavInfos)
         else : 
             # got lost
-            uavInfos['STATE'] = Enum.INITIAL_STATE
-            hazardZone['tracking_drones'].remove(uavInfos['OBJ'].getID())
+            uav_lat = uavInfos['OBJ'].getLatitude()
+            uav_lon = uavInfos['OBJ'].getLongitude()
+
+            uavInfos['NEXT_HEADING'] =  self.utils.getHeadingToDest(uav_lat, uav_lon, smokeZone['point'][0], smokeZone['point'][1])
         
-    def isStillTracking(self, uavInfos):
+    def isStillPatrolling(self, uavInfos):
         # tracking condition : interval between current time and last_tracking_time
-        last_tracking_time = uavInfos['STATE_DETAIL'][Enum.TRACKING]['last_tracking_time']
+        last_tracking_time = uavInfos['STATE_DETAIL'][Enum.PATROLLING]['last_patrolling_time']
         current_time = uavInfos['OBJ'].getTime()
 
-        return (current_time - last_tracking_time)//1000 < 45
+        return (current_time - last_tracking_time)//1000 < 15
+
     
-    def gointoZone(self, uavInfos):
-        msg = uavInfos['STATE_DETAIL'][Enum.TRACKING]['msg']
+    def turnRightAngle(self, uavInfos):
+        msgForCheck = uavInfos['STATE_DETAIL'][Enum.PATROLLING]['msgForCheck']
+        msgForCmd = uavInfos['STATE_DETAIL'][Enum.PATROLLING]['msgForCmd']
 
-        if msg == 1:
-            uavInfos['STATE_DETAIL'][Enum.TRACKING]['msg'] = -1
-        elif msg == -1 :
+        if msgForCheck == 1 :
+            uavInfos['STATE_DETAIL'][Enum.PATROLLING]['msgForCheck'] = -1
+        elif msgForCheck == -1 and msgForCmd != 1:
             originalDirection = self.getOriginalDirection(uavInfos)
-            azimuth = uavInfos['OBJ'].getCameraAzimuth()
-            direction = uavInfos['STATE_DETAIL'][Enum.TRACKING]['tracking_direction']
+            uavInfos['NEXT_HEADING'] = originalDirection+90
+            uavInfos['STATE_DETAIL'][Enum.PATROLLING]['msgForCmd'] = 1
 
-            uavInfos['NEXT_HEADING'] = originalDirection+direction*(self.change)*(-1)
-            if azimuth > 60 or azimuth < -60 :
-                uavInfos['NEXT_AZIMUTH'] = azimuth + direction*(self.change)
-
-    def gooutFromZone(self, uavInfos):
-        direction = uavInfos['STATE_DETAIL'][Enum.TRACKING]['tracking_direction']
-        uavInfos['STATE_DETAIL'][Enum.TRACKING]['msg'] = 1
+    def goStraight(self, uavInfos):
+        uavInfos['STATE_DETAIL'][Enum.PATROLLING]['msgForCheck'] = 1
+        uavInfos['STATE_DETAIL'][Enum.PATROLLING]['msgForCmd'] = 0
 
         originalDirection = self.getOriginalDirection(uavInfos)
-        azimuth = uavInfos['OBJ'].getCameraAzimuth()
-
-
-        uavInfos['NEXT_HEADING'] =  originalDirection+direction*(self.change)
-
-        if azimuth < 60 and azimuth > -60:
-            uavInfos['NEXT_AZIMUTH'] = azimuth + direction*(self.change)*(-1)
-            
+        uavInfos['NEXT_HEADING'] =  originalDirection
 
     def getOriginalDirection(self, uavInfos):
         heading = uavInfos['OBJ'].getHeading()

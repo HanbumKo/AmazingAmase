@@ -613,6 +613,9 @@ class VoronoiSearch():
             polygon_count += 1
             region_count = 0
 
+        print("waypoints!!!\n",waypointlist)
+        waypointlist = np.array(waypointlist)
+
         # print("waypoints!!!\n",waypointlist)
         # waypointlist = np.array(waypointlist)
         # for i in range(len(waypointlist)):
@@ -621,6 +624,37 @@ class VoronoiSearch():
         #         ax4.plot(waypointlist[i][j][:, 0], waypointlist[i][j][:, 1],'v')
         #         for k in range(len(waypointlist[i][j])):
         #             ax4.text(waypointlist[i][j][k][0],waypointlist[i][j][k][1],'{}'.format(k),fontsize=6)
+        ''',
+        set order of points
+        '''
+        distancelist = []
+        shortestroute = []
+
+        for i in range(len(totalpoints)):
+            #print("nearpointslist[i]\n",totalpoints[i])
+            if self.startway == 0:
+                startidx = nearpointslist_idx[i][0]
+            elif self.startway == 1:
+                startidx = farpointslist_idx[i][0]
+            elif self.startway == 2:
+                startidx = smallpointslist_idx[i][0]
+            else:
+                startidx = largepointslist_idx[i][0]
+            temp, route = self.findnearestlist(totalpoints[i], startidx)
+            #print("route\n",route)
+            distancelist.append(temp)
+            shortestroute.append(route)
+
+        '''
+        set order of points END
+        '''
+        totalpoints = np.array(totalpoints)
+        nearpointslist = np.array(nearpointslist)
+        farpointslist = np.array(farpointslist)
+        largepointslist = np.array(largepointslist)
+        smallpointslist = np.array(smallpointslist)
+
+        print("totalpoints\n",totalpoints)
         # '''
         # set order of points
         # '''
