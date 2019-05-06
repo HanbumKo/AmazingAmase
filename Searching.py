@@ -3,7 +3,6 @@ import Utils
 import VoronoiForInitialSearch
 import Enum
 import StraightForInitialSearch
-
 import numpy as np
 import math
 class Searching():
@@ -19,8 +18,8 @@ class Searching():
 
         nkeepinzone = len(keepinzone)
         nrecoveryzone = len(recoveryzone)
-        numberofdroneeachrecoveryzone = NumberofDrones / nrecoveryzone
-        print("numberofdroneeachrecoveryzone",int(numberofdroneeachrecoveryzone))
+        numberofdroneeachrecoveryzone = int(NumberofDrones / nrecoveryzone)
+        #print("numberofdroneeachrecoveryzone",int(numberofdroneeachrecoveryzone))
         pointlist = [[] for _ in range(nkeepinzone + nrecoveryzone)]
 
         for i in range(nkeepinzone):
@@ -36,18 +35,21 @@ class Searching():
         3 = largest
         '''
         try:
-            print("voronoi...")
             self.initialsearchpoints = VoronoiForInitialSearch.VoronoiSearch(np.array(pointlist), nkeepinzone, nrecoveryzone, numberofdroneeachrecoveryzone, startway)
+            print("voronoi...")
             self.waypointlists = self.initialsearchpoints.voronoialgo()
-            print("done")    
+            print("done")
+            # print("SEARCHCOORD\n", self.initialsearchpoints.searchcoord)
+            # print("SEARCHROUTE\n", self.initialsearchpoints.searchroute)
         except:
             print("straight...")
+            # print(pointlist)
             self.initialsearchpoints = StraightForInitialSearch.StraightSearch(np.array(pointlist), nkeepinzone, nrecoveryzone, int(numberofdroneeachrecoveryzone))
             self.waypointlists = self.initialsearchpoints.straightalgo().tolist()
+
             print("done")
 
     def setTrackingSection(self, searchMap):
-
         for i in range(len(self.waypointlists)):
             print(" - RecoveryArea_"+str(i)+"setting")
             searchMap['RecoveryArea_'+str(i)] = {}
@@ -61,6 +63,7 @@ class Searching():
                 }
             print(" - Done")
         print(searchMap)
+
     
     def returnwaypointlists(self):
         waypointlist = []

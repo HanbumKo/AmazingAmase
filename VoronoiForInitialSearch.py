@@ -17,7 +17,7 @@ class VoronoiSearch():
         self.number_drone_each_recoveryzone = numberofdroneeachrecoveryzone
         self.searchcoord = []
         self.searchroute = []
-        print("pointlist\n",pointlist)
+        # print("pointlist\n",pointlist)
         '''
         startway
         0 = nearest
@@ -413,7 +413,7 @@ class VoronoiSearch():
         # coord = [[0 for _ in range(len(trilist[i].simplices))] for i in range(len(find_touchingpoint_keepinzone_list))]
         # arealist = [[0 for _ in range(len(trilist[i].simplices))] for i in
         #             range(len(find_touchingpoint_keepinzone_list))]
-        tri = Delaunay(self.points)
+        # tri = Delaunay(self.points)
         vor = Voronoi(self.points[4:])
         regions, vertices = self.voronoi_finite_polygons_2d(vor)
         # print(regions, vertices)
@@ -421,7 +421,7 @@ class VoronoiSearch():
         '''
         Visualization
         '''
-        fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
+        # fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(nrows=2, ncols=2)
 
         # ax1.set_xlim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
         # ax1.set_ylim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
@@ -432,38 +432,38 @@ class VoronoiSearch():
         # ax4.set_ylim([self.points[2][0] - 0.05, self.points[1][0] + 0.05])
         # ax4.set_xlim([self.points[0][1] - 0.05, self.points[1][1] + 0.05])
 
-        ax1.set_xlim([self.points[2][0], self.points[1][0]])
-        ax1.set_ylim([self.points[0][1], self.points[1][1]])
-        ax2.set_xlim([self.points[2][0], self.points[1][0]])
-        ax2.set_ylim([self.points[0][1], self.points[1][1]])
-        ax3.set_xlim([self.points[2][0], self.points[1][0]])
-        ax3.set_ylim([self.points[0][1], self.points[1][1]])
-        ax4.set_xlim([self.points[2][0], self.points[1][0]])
-        ax4.set_ylim([self.points[0][1], self.points[1][1]])
+        # ax1.set_xlim([self.points[2][0], self.points[1][0]])
+        # ax1.set_ylim([self.points[0][1], self.points[1][1]])
+        # ax2.set_xlim([self.points[2][0], self.points[1][0]])
+        # ax2.set_ylim([self.points[0][1], self.points[1][1]])
+        # ax3.set_xlim([self.points[2][0], self.points[1][0]])
+        # ax3.set_ylim([self.points[0][1], self.points[1][1]])
+        # ax4.set_xlim([self.points[2][0], self.points[1][0]])
+        # ax4.set_ylim([self.points[0][1], self.points[1][1]])
 
         # print(self.points)
         # print(type(self.points[0]))
         # print(type(self.points))
         #ax1.triplot(self.points[:, 0], self.points[:, 1], tri.simplices.copy())
-        ax1.plot(self.points[:, 0], self.points[:, 1], 'o')
-        for i in range(len(self.points)):
-            ax1.text(self.points[i][0], self.points[i][1],'{}'.format(i), fontsize=6)
+        # ax1.plot(self.points[:, 0], self.points[:, 1], 'o')
+        # for i in range(len(self.points)):
+        #     ax1.text(self.points[i][0], self.points[i][1],'{}'.format(i), fontsize=6)
 
         polygon_count=0
         region_count=0
         '''
         Each polygon
         '''
-        nearpointslist = []
-        farpointslist = []
-        largepointslist = []
-        smallpointslist = []
-
-        nearpointslist_idx = []
-        farpointslist_idx = []
-        largepointslist_idx = []
-        smallpointslist_idx = []
-        totalpoints = []
+        # nearpointslist = []
+        # farpointslist = []
+        # largepointslist = []
+        # smallpointslist = []
+        #
+        # nearpointslist_idx = []
+        # farpointslist_idx = []
+        # largepointslist_idx = []
+        # smallpointslist_idx = []
+        # totalpoints = []
         waypointlist = []
 
         for region in regions:
@@ -507,13 +507,13 @@ class VoronoiSearch():
             '''
             Visualization
             '''
-            in_keepinzone_points_coord = np.array(in_keepinzone_points_coord)
+            # in_keepinzone_points_coord = np.array(in_keepinzone_points_coord)
             # print("in_keepinzone_points_coord",in_keepinzone_points_coord)
-            ax2.plot(in_keepinzone_points_coord[:,0], in_keepinzone_points_coord[:,1], 'o')
-            ax2.plot(self.points[polygon_count+4, 0], self.points[polygon_count+4, 1],'v')
-            ax2.text(self.points[polygon_count+4, 0], self.points[polygon_count+4, 1]+0.01,'{}'.format(polygon_count), fontsize=6)
-            for ttt in range(len(in_keepinzone_points_coord)):
-                ax2.text(in_keepinzone_points_coord[ttt][0],in_keepinzone_points_coord[ttt][1]+polygon_count*0.02,'{} point:{}'.format(polygon_count, ttt), fontsize=6)
+            # ax2.plot(in_keepinzone_points_coord[:,0], in_keepinzone_points_coord[:,1], 'o')
+            # ax2.plot(self.points[polygon_count+4, 0], self.points[polygon_count+4, 1],'v')
+            # ax2.text(self.points[polygon_count+4, 0], self.points[polygon_count+4, 1]+0.01,'{}'.format(polygon_count), fontsize=6)
+            # for ttt in range(len(in_keepinzone_points_coord)):
+            #     ax2.text(in_keepinzone_points_coord[ttt][0],in_keepinzone_points_coord[ttt][1]+polygon_count*0.02,'{} point:{}'.format(polygon_count, ttt), fontsize=6)
 
             '''
             voronoi로 나눈 지역 delaunay로 나눔
@@ -530,22 +530,22 @@ class VoronoiSearch():
             # print("arealist\n",arealist)
             # print("coordlist\n",coordlist)
 
-            totalpoints.append(coordlist)
+            # totalpoints.append(coordlist)
             waypointlist.append(oneofarea)
 
-            '''
-            NEAR POINTS
-            '''
-            nearpoints_idx = self.calcdistancecenterandrecovery(coordlist, self.points[polygon_count+4])
-            nearpoints = [0 for _ in range(len(coordlist))]
-            for i in range(len(nearpoints_idx)):
-                nearpoints[i] = coordlist[nearpoints_idx[i]]
-            nearpointslist.append(nearpoints)
-            nearpointslist_idx.append(nearpoints_idx)
-
-            farpoints = nearpoints[::-1]
-            farpointslist.append(farpoints)
-            farpointslist_idx.append(nearpoints_idx[::-1])
+            # '''
+            # NEAR POINTS
+            # '''
+            # nearpoints_idx = self.calcdistancecenterandrecovery(coordlist, self.points[polygon_count+4])
+            # nearpoints = [0 for _ in range(len(coordlist))]
+            # for i in range(len(nearpoints_idx)):
+            #     nearpoints[i] = coordlist[nearpoints_idx[i]]
+            # nearpointslist.append(nearpoints)
+            # nearpointslist_idx.append(nearpoints_idx)
+            #
+            # farpoints = nearpoints[::-1]
+            # farpointslist.append(farpoints)
+            # farpointslist_idx.append(nearpoints_idx[::-1])
             # print("NEAR")
             # print(np.array(coordlist))
             # print(np.array(nearpoints_idx))
@@ -555,19 +555,19 @@ class VoronoiSearch():
             '''
 
 
-            '''
-            SIZE POINTS
-            '''
-            smallpoints_idx = self.sortaraesize(arealist)
-            smallpoints = [0 for _ in range(len(coordlist))]
-            for i in range(len(smallpoints_idx)):
-                smallpoints[i] = coordlist[smallpoints_idx[i]]
-            smallpointslist.append(smallpoints)
-            smallpointslist_idx.append(smallpoints_idx)
-
-            largepoints = smallpoints[::-1]
-            largepointslist.append(largepoints)
-            largepointslist_idx.append(smallpoints_idx[::-1])
+            # '''
+            # SIZE POINTS
+            # '''
+            # smallpoints_idx = self.sortaraesize(arealist)
+            # smallpoints = [0 for _ in range(len(coordlist))]
+            # for i in range(len(smallpoints_idx)):
+            #     smallpoints[i] = coordlist[smallpoints_idx[i]]
+            # smallpointslist.append(smallpoints)
+            # smallpointslist_idx.append(smallpoints_idx)
+            #
+            # largepoints = smallpoints[::-1]
+            # largepointslist.append(largepoints)
+            # largepointslist_idx.append(smallpoints_idx[::-1])
             '''
             SIZE POINTS END
             '''
@@ -592,15 +592,15 @@ class VoronoiSearch():
             '''
             Visualization
             '''
-            coordlist = np.array(coordlist)
-            #coordlist = coordlist
-            adjusted_polygon_points_coord = np.array(adjusted_polygon_points_coord)
+            # coordlist = np.array(coordlist)
+            # #coordlist = coordlist
+            # adjusted_polygon_points_coord = np.array(adjusted_polygon_points_coord)
 
-            ax3.triplot(adjusted_polygon_points_coord[:, 0], adjusted_polygon_points_coord[:, 1],trilist.simplices.copy())
-            ax3.plot(coordlist[:, 0], coordlist[:, 1], 'o')
-
-            for ttt in range(len(trilist.simplices)):
-                ax3.text(coordlist[ttt][0],coordlist[ttt][1]+polygon_count*0.01,'{}\n{}'.format(ttt, round(arealist[ttt],3)), fontsize=6)
+            # ax3.triplot(adjusted_polygon_points_coord[:, 0], adjusted_polygon_points_coord[:, 1],trilist.simplices.copy())
+            # ax3.plot(coordlist[:, 0], coordlist[:, 1], 'o')
+            #
+            # for ttt in range(len(trilist.simplices)):
+            #     ax3.text(coordlist[ttt][0],coordlist[ttt][1]+polygon_count*0.01,'{}\n{}'.format(ttt, round(arealist[ttt],3)), fontsize=6)
 
 
 
@@ -615,6 +615,9 @@ class VoronoiSearch():
 
         print("waypoints!!!\n",waypointlist)
         waypointlist = np.array(waypointlist)
+
+        # print("waypoints!!!\n",waypointlist)
+        # waypointlist = np.array(waypointlist)
         # for i in range(len(waypointlist)):
         #     waypointlist[i] = np.array(waypointlist[i])
         #     for j in range(len(waypointlist[i])):
@@ -652,6 +655,37 @@ class VoronoiSearch():
         smallpointslist = np.array(smallpointslist)
 
         print("totalpoints\n",totalpoints)
+        # '''
+        # set order of points
+        # '''
+        # distancelist = []
+        # shortestroute = []
+        #
+        # for i in range(len(totalpoints)):
+        #     #print("nearpointslist[i]\n",totalpoints[i])
+        #     if self.startway == 0:
+        #         startidx = nearpointslist_idx[i][0]
+        #     elif self.startway == 1:
+        #         startidx = farpointslist_idx[i][0]
+        #     elif self.startway == 2:
+        #         startidx = smallpointslist_idx[i][0]
+        #     else:
+        #         startidx = largepointslist_idx[i][0]
+        #     temp, route = self.findnearestlist(totalpoints[i], startidx)
+        #     #print("route\n",route)
+        #     distancelist.append(temp)
+        #     shortestroute.append(route)
+        #
+        # '''
+        # set order of points END
+        # '''
+        # totalpoints = np.array(totalpoints)
+        # nearpointslist = np.array(nearpointslist)
+        # farpointslist = np.array(farpointslist)
+        # largepointslist = np.array(largepointslist)
+        # smallpointslist = np.array(smallpointslist)
+
+        # print("totalpoints\n",totalpoints)
         # print("near\n", nearpointslist)
         # print(nearpointslist_idx)
         # print("far\n", farpointslist)
@@ -663,8 +697,8 @@ class VoronoiSearch():
         #
         # print("distancelist\n",np.array(distancelist))
         # print("shortestroute\n",shortestroute)
-        self.searchcoord = totalpoints
-        self.searchroute = shortestroute
+        # self.searchcoord = totalpoints
+        # self.searchroute = shortestroute
         return waypointlist
         # plt.show()
 
