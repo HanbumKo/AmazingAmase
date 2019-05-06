@@ -615,12 +615,12 @@ class VoronoiSearch():
 
         print("waypoints!!!\n",waypointlist)
         waypointlist = np.array(waypointlist)
-        for i in range(len(waypointlist)):
-            waypointlist[i] = np.array(waypointlist[i])
-            for j in range(len(waypointlist[i])):
-                ax4.plot(waypointlist[i][j][:, 0], waypointlist[i][j][:, 1],'v')
-                for k in range(len(waypointlist[i][j])):
-                    ax4.text(waypointlist[i][j][k][0],waypointlist[i][j][k][1],'{}'.format(k),fontsize=6)
+        # for i in range(len(waypointlist)):
+        #     waypointlist[i] = np.array(waypointlist[i])
+        #     for j in range(len(waypointlist[i])):
+        #         ax4.plot(waypointlist[i][j][:, 0], waypointlist[i][j][:, 1],'v')
+        #         for k in range(len(waypointlist[i][j])):
+        #             ax4.text(waypointlist[i][j][k][0],waypointlist[i][j][k][1],'{}'.format(k),fontsize=6)
         ''',
         set order of points
         '''
